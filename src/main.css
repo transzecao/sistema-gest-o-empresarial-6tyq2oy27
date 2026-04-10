@@ -1,133 +1,77 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 49 46% 93%; /* #F6F3E4 */
+    --foreground: 18 67% 2%; /* #050201 */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 18 67% 2%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 18 67% 2%;
 
-    /* Transzecão Primary Blue (#003D7A) */
-    --primary: 210 100% 24%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 348 100% 12%; /* #3D000C */
+    --primary-foreground: 49 46% 93%; /* #F6F3E4 */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 24 4% 35%; /* #5E5A57 */
+    --secondary-foreground: 49 46% 93%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 49 20% 85%;
+    --muted-foreground: 24 4% 35%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 49 20% 85%;
+    --accent-foreground: 18 67% 2%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 210 100% 24%;
+    --border: 49 20% 80%;
+    --input: 49 20% 80%;
+    --ring: 348 100% 12%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 210 100% 24%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 210 100% 24%;
-    --sidebar-accent: 210 100% 30%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 210 100% 20%;
-    --sidebar-ring: 210 100% 50%;
-
-    --chart-1: 210 100% 24%;
-    --chart-2: 189 100% 38%;
-    --chart-3: 209 100% 32%;
-    --chart-4: 42 100% 50%;
-    --chart-5: 33 100% 50%;
+    --sidebar-background: 348 100% 12%;
+    --sidebar-foreground: 49 46% 93%;
+    --sidebar-primary: 49 46% 93%;
+    --sidebar-primary-foreground: 348 100% 12%;
+    --sidebar-accent: 348 80% 20%;
+    --sidebar-accent-foreground: 49 46% 93%;
+    --sidebar-border: 348 80% 20%;
+    --sidebar-ring: 49 46% 93%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 100% 50%;
-    --primary-foreground: 222.2 84% 4.9%;
-
-    --secondary: 222.2 84% 4.9%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 222.2 84% 4.9%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 222.2 84% 4.9%;
-    --accent-foreground: 210 40% 98%;
-
+    --background: 18 67% 2%;
+    --foreground: 49 46% 93%;
+    --card: 18 67% 2%;
+    --card-foreground: 49 46% 93%;
+    --popover: 18 67% 2%;
+    --popover-foreground: 49 46% 93%;
+    --primary: 348 100% 12%;
+    --primary-foreground: 49 46% 93%;
+    --secondary: 24 4% 35%;
+    --secondary-foreground: 49 46% 93%;
+    --muted: 24 4% 20%;
+    --muted-foreground: 49 20% 80%;
+    --accent: 24 4% 20%;
+    --accent-foreground: 49 46% 93%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 210 100% 50%;
-
-    --sidebar-background: 210 100% 15%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 210 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 100% 20%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 210 100% 10%;
-    --sidebar-ring: 210 100% 50%;
-  }
-
-  body {
-    font-family: 'Inter', sans-serif;
-  }
-
-  section[aria-label='Notifications alt+T'] {
-    padding: 0 !important;
-    margin: 0 !important;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 24 4% 20%;
+    --input: 24 4% 20%;
+    --ring: 348 100% 12%;
   }
 }
 
-@layer utilities {
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+@layer base {
+  * {
+    @apply border-border;
   }
-
-  @keyframes slide-up {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.4s ease-out;
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  body {
+    @apply bg-background text-foreground;
   }
 }

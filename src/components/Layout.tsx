@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom'
-import { getRole, logout, Role } from '@/lib/auth'
+import { useAuth } from '@/hooks/use-auth'
 import {
   SidebarProvider,
   Sidebar,
@@ -33,7 +32,7 @@ import {
   Truck,
 } from 'lucide-react'
 
-const navConfig: Record<Role, { title: string; icon: any }[]> = {
+const navConfig: Record<string, { title: string; icon: any }[]> = {
   Diretor: [
     { title: 'Métricas', icon: BarChart },
     { title: 'Gestão de Supervisores', icon: Users },
@@ -41,7 +40,7 @@ const navConfig: Record<Role, { title: string; icon: any }[]> = {
   ],
   Supervisor: [
     { title: 'Gestão de Formulários', icon: FileText },
-    { title: 'Aprovação', icon: CheckSquare },
+    { title: 'Aprovações', icon: CheckSquare },
     { title: 'Métricas da Equipe', icon: TrendingUp },
   ],
   Funcionário: [
@@ -60,40 +59,34 @@ const navConfig: Record<Role, { title: string; icon: any }[]> = {
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [role, setRole] = useState<Role | null>(null)
-
-  useEffect(() => {
-    const currentRole = getRole()
-    if (!currentRole) {
-      navigate('/')
-    } else {
-      setRole(currentRole)
-    }
-  }, [navigate])
+  const { user, profile, signOut } = useAuth()
 
   const handleLogout = () => {
-    logout()
+    signOut()
     navigate('/')
   }
 
-  if (!role) return null
+  if (!user) return null
 
-  const currentNav = navConfig[role] || []
+  const roleName = profile?.name || 'Carregando...'
+  const currentNav = profile?.name ? navConfig[profile.name] || [] : []
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gray-50 animate-fade-in">
+      <div className="flex min-h-screen w-full bg-background animate-fade-in">
         <Sidebar className="border-r-0 shadow-xl" collapsible="icon">
           <SidebarHeader className="py-4">
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton size="lg" className="hover:bg-transparent pointer-events-none">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white text-primary">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary-foreground text-primary">
                     <Truck className="size-5" />
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold text-base text-white">Transzecão</span>
-                    <span className="text-xs text-sidebar-primary-foreground/80">Gestão 360</span>
+                    <span className="font-semibold text-base text-sidebar-foreground">
+                      Transzecão
+                    </span>
+                    <span className="text-xs text-sidebar-foreground/80">Gestão 360</span>
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -106,6 +99,7 @@ export default function Layout() {
                   asChild
                   isActive={location.pathname === '/dashboard'}
                   tooltip="Visão Geral"
+                  className="text-sidebar-foreground"
                 >
                   <Link to="/dashboard">
                     <LayoutDashboard />
@@ -122,14 +116,14 @@ export default function Layout() {
                 <SidebarMenuItem key={index}>
                   <SidebarMenuButton
                     tooltip={item.title}
-                    className="opacity-60 hover:opacity-100 transition-opacity"
+                    className="opacity-60 hover:opacity-100 transition-opacity text-sidebar-foreground cursor-not-allowed"
                     onClick={(e) => {
                       e.preventDefault()
                     }}
                   >
                     <item.icon />
                     <span>{item.title}</span>
-                    <span className="ml-auto text-[9px] uppercase tracking-wider bg-white/10 px-1.5 py-0.5 rounded text-white/70">
+                    <span className="ml-auto text-[9px] uppercase tracking-wider bg-white/20 px-1.5 py-0.5 rounded text-sidebar-foreground/80">
                       Em breve
                     </span>
                   </SidebarMenuButton>
@@ -142,7 +136,7 @@ export default function Layout() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={handleLogout}
-                  className="text-sidebar-primary-foreground hover:bg-red-500/20 hover:text-white transition-colors"
+                  className="text-sidebar-foreground hover:bg-red-500/20 hover:text-red-100 transition-colors"
                 >
                   <LogOut />
                   <span>Sair do sistema</span>
@@ -152,36 +146,36 @@ export default function Layout() {
           </SidebarFooter>
         </Sidebar>
 
-        <SidebarInset className="flex flex-col flex-1 overflow-hidden bg-gray-50">
-          <header className="flex h-16 items-center justify-between border-b bg-white px-6 shadow-sm sticky top-0 z-10">
+        <SidebarInset className="flex flex-col flex-1 overflow-hidden bg-background">
+          <header className="flex h-16 items-center justify-between border-b bg-card px-6 shadow-sm sticky top-0 z-10">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="-ml-2 text-primary hover:bg-primary/10 hover:text-primary transition-colors" />
               <Separator orientation="vertical" className="h-6" />
-              <h2 className="font-semibold text-lg text-gray-800">Workspace Central</h2>
+              <h2 className="font-semibold text-lg text-foreground">Workspace Central</h2>
             </div>
 
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative text-gray-500 hover:text-primary hover:bg-primary/5"
+                className="relative text-secondary hover:text-primary hover:bg-primary/5"
               >
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-red-500 border-2 border-white"></span>
               </Button>
-              <div className="flex items-center gap-3 border-l pl-4">
+              <div className="flex items-center gap-3 border-l border-border pl-4">
                 <div className="flex-col items-end hidden sm:flex">
-                  <span className="text-sm font-medium leading-none text-gray-900">
-                    Perfil: {role}
+                  <span className="text-sm font-medium leading-none text-foreground">
+                    {user?.name || user?.email}
                   </span>
-                  <span className="text-xs text-gray-500 mt-1">Acesso Autenticado</span>
+                  <span className="text-xs text-secondary mt-1">{roleName}</span>
                 </div>
                 <Avatar className="h-9 w-9 border-2 border-primary/20">
                   <AvatarImage
-                    src={`https://img.usecurling.com/ppl/thumbnail?gender=male&seed=${role.length}`}
+                    src={`https://img.usecurling.com/ppl/thumbnail?gender=male&seed=${user?.id}`}
                   />
                   <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                    {role.charAt(0)}
+                    {user?.name?.charAt(0) || 'U'}
                   </AvatarFallback>
                 </Avatar>
               </div>
