@@ -97,11 +97,25 @@ export default function Layout() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={location.pathname === '/dashboard'}
+                  isActive={location.pathname.startsWith('/dashboard')}
                   tooltip="Visão Geral"
                   className="text-sidebar-foreground"
                 >
-                  <Link to="/dashboard">
+                  <Link
+                    to={
+                      profile?.name === 'Diretor'
+                        ? '/dashboard/diretor'
+                        : profile?.name === 'Supervisor'
+                          ? '/dashboard/supervisor'
+                          : profile?.name === 'Funcionário'
+                            ? '/dashboard/funcionario'
+                            : profile?.name === 'Sub-função'
+                              ? '/dashboard/sub-funcao'
+                              : profile?.name === 'Cliente'
+                                ? '/dashboard/cliente'
+                                : '/dashboard'
+                    }
+                  >
                     <LayoutDashboard />
                     <span>Visão Geral</span>
                   </Link>
@@ -139,7 +153,7 @@ export default function Layout() {
                   className="text-sidebar-foreground hover:bg-red-500/20 hover:text-red-100 transition-colors"
                 >
                   <LogOut />
-                  <span>Sair do sistema</span>
+                  <span>Sair</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

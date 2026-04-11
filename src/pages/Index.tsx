@@ -17,29 +17,67 @@ import { getErrorMessage } from '@/lib/pocketbase/errors'
 
 export default function Index() {
   const navigate = useNavigate()
-  const { user, signIn } = useAuth()
+  const { user, profile, signIn, loading: authLoading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard')
+    if (!authLoading && user) {
+      const profileName = profile?.name || ''
+      switch (profileName) {
+        case 'Diretor':
+          navigate('/dashboard/diretor')
+          break
+        case 'Supervisor':
+          navigate('/dashboard/supervisor')
+          break
+        case 'Funcionário':
+          navigate('/dashboard/funcionario')
+          break
+        case 'Sub-função':
+          navigate('/dashboard/sub-funcao')
+          break
+        case 'Cliente':
+          navigate('/dashboard/cliente')
+          break
+        default:
+          navigate('/dashboard')
+      }
     }
-  }, [user, navigate])
+  }, [user, profile, authLoading, navigate])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     if (email && password) {
       setLoading(true)
       setErrorMsg('')
-      const { error } = await signIn(email, password)
+      const { error, record } = await signIn(email, password)
       if (error) {
-        setErrorMsg(getErrorMessage(error))
+        setErrorMsg('E-mail ou senha inválidos')
         setLoading(false)
       } else {
-        navigate('/dashboard')
+        const profileName = record?.expand?.profile_id?.name || ''
+        switch (profileName) {
+          case 'Diretor':
+            navigate('/dashboard/diretor')
+            break
+          case 'Supervisor':
+            navigate('/dashboard/supervisor')
+            break
+          case 'Funcionário':
+            navigate('/dashboard/funcionario')
+            break
+          case 'Sub-função':
+            navigate('/dashboard/sub-funcao')
+            break
+          case 'Cliente':
+            navigate('/dashboard/cliente')
+            break
+          default:
+            navigate('/dashboard')
+        }
       }
     }
   }
@@ -97,17 +135,13 @@ export default function Index() {
                   <strong>Contas de teste:</strong>
                 </p>
                 <ul className="list-disc pl-4 space-y-1 mt-1 text-xs">
-                  <li>director@transzecao.com</li>
+                  <li>diretor@transzecao.com</li>
                   <li>supervisor@transzecao.com</li>
-                  <li>employee@transzecao.com</li>
-                  <li>sub@transzecao.com</li>
-                  <li>client@transzecao.com</li>
+                  <li>funcionario@transzecao.com</li>
                 </ul>
                 <p className="mt-2 text-xs">
                   Senha:{' '}
-                  <code className="bg-gray-200 px-1 rounded text-black font-semibold">
-                    Skip@Pass123
-                  </code>
+                  <code className="bg-gray-200 px-1 rounded text-black font-semibold">123456</code>
                 </p>
               </div>
             </CardContent>

@@ -4,7 +4,7 @@ import pb from '@/lib/pocketbase/client'
 export interface AuthContextType {
   user: any
   profile: any
-  signIn: (email: string, password: string) => Promise<{ error: any }>
+  signIn: (email: string, password: string) => Promise<{ error: any; record?: any }>
   signOut: () => void
   loading: boolean
 }
@@ -23,17 +23,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let isMounted = true
     const loadProfile = async (record: any) => {
       if (record?.profile_id) {
         try {
           const p = await pb.collection('profiles').getOne(record.profile_id)
-          setProfile(p)
+          if (isMounted) setProfile(p)
         } catch (e) {
-          setProfile(null)
+          if (isMounted) setProfile(null)
         }
       } else {
-        setProfile(null)
+        if (isMounted) setProfile(null)
       }
+      if (isMounted) setLoading(false)
     }
 
     loadProfile(pb.authStore.record)
@@ -42,15 +44,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(record)
       loadProfile(record)
     })
-    setLoading(false)
+
     return () => {
+      isMounted = false
       unsubscribe()
     }
   }, [])
 
   const signIn = async (email: string, password: string) => {
     try {
-      await pb.collection('users').authWithPassword(email, password)
+      const authData = await pb
+        .collection('users')
+        .authWithPassword(email, password, { expand: 'profile_id' })
       try {
         const currentUser = pb.authStore.record
         if (currentUser) {
@@ -64,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch (e) {
         console.error('Failed to create audit log', e)
       }
-      return { error: null }
+      return { error: null, record: authData.record }
     } catch (error) {
       return { error }
     }
