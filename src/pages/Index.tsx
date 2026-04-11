@@ -53,31 +53,36 @@ export default function Index() {
     if (email && password) {
       setLoading(true)
       setErrorMsg('')
-      const { error, record } = await signIn(email, password)
-      if (error) {
-        setErrorMsg('E-mail ou senha inválidos')
-        setLoading(false)
-      } else {
-        const profileName = record?.expand?.profile_id?.name || ''
-        switch (profileName) {
-          case 'Diretor':
-            navigate('/dashboard/diretor')
-            break
-          case 'Supervisor':
-            navigate('/dashboard/supervisor')
-            break
-          case 'Funcionário':
-            navigate('/dashboard/funcionario')
-            break
-          case 'Sub-função':
-            navigate('/dashboard/sub-funcao')
-            break
-          case 'Cliente':
-            navigate('/dashboard/cliente')
-            break
-          default:
-            navigate('/dashboard')
+      try {
+        const { error, record } = await signIn(email, password)
+        if (error) {
+          setErrorMsg('E-mail ou senha inválidos')
+        } else {
+          const profileName = record?.expand?.profile_id?.name || ''
+          switch (profileName) {
+            case 'Diretor':
+              navigate('/dashboard/diretor')
+              break
+            case 'Supervisor':
+              navigate('/dashboard/supervisor')
+              break
+            case 'Funcionário':
+              navigate('/dashboard/funcionario')
+              break
+            case 'Sub-função':
+              navigate('/dashboard/sub-funcao')
+              break
+            case 'Cliente':
+              navigate('/dashboard/cliente')
+              break
+            default:
+              navigate('/dashboard')
+          }
         }
+      } catch (err) {
+        setErrorMsg('E-mail ou senha inválidos')
+      } finally {
+        setLoading(false)
       }
     }
   }
@@ -141,7 +146,9 @@ export default function Index() {
                 </ul>
                 <p className="mt-2 text-xs">
                   Senha:{' '}
-                  <code className="bg-gray-200 px-1 rounded text-black font-semibold">123456</code>
+                  <code className="bg-gray-200 px-1 rounded text-black font-semibold">
+                    Skip@2026
+                  </code>
                 </p>
               </div>
             </CardContent>

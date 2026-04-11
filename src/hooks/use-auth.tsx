@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       return { error: null, record: authData.record }
     } catch (error) {
+      console.error('Authentication failed:', error)
       return { error }
     }
   }
