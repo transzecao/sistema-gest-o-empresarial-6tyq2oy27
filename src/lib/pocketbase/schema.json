@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-04-10T23:55:49.778Z",
+  "generatedAt": "2026-04-11T00:10:23.596Z",
   "collections": [
     {
       "name": "users",
       "type": "auth",
       "apiRules": {
-        "list": "id = @request.auth.id",
-        "view": "id = @request.auth.id",
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
         "create": "",
         "update": "id = @request.auth.id",
         "delete": "id = @request.auth.id"

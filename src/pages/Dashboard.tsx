@@ -1,128 +1,140 @@
-import { useAuth } from '@/hooks/use-auth'
+import { useEffect, useState } from 'react'
+import { getUsers, User } from '@/services/governance'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity, LayoutDashboard, Lock, Sparkles, Bell } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Users, Shield, Activity, UserCog } from 'lucide-react'
 import { useRealtime } from '@/hooks/use-realtime'
-import { useToast } from '@/hooks/use-toast'
 
 export default function Dashboard() {
-  const { profile, user } = useAuth()
-  const { toast } = useToast()
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const roleName = profile?.name || '...'
-
-  useRealtime('audit_logs', (e) => {
-    if (e.action === 'create' && e.record.user_id !== user?.id) {
-      toast({
-        title: 'Novo log de auditoria',
-        description: `Uma ação de ${e.record.action} foi registrada.`,
-      })
+  const loadUsers = async () => {
+    try {
+      const data = await getUsers()
+      setUsers(data)
+    } catch (error) {
+      console.error('Failed to load users:', error)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
+    loadUsers()
+  }, [])
+
+  // Keep table in sync with real-time updates
+  useRealtime('users', () => {
+    loadUsers()
   })
 
+  const stats = [
+    { label: 'Total Users', value: users.length, icon: Users },
+    {
+      label: 'Active Profiles',
+      value: new Set(users.map((u) => u.profile_id).filter(Boolean)).size,
+      icon: Shield,
+    },
+    {
+      label: 'Sectors Assigned',
+      value: new Set(users.map((u) => u.sector).filter(Boolean)).size,
+      icon: Activity,
+    },
+  ]
+
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-slide-up">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Bem-vindo, {roleName}!
-        </h1>
-        <p className="text-secondary text-lg">
-          Este é o seu painel de controle central. Navegue pelos módulos disponíveis no menu
-          lateral.
-        </p>
+    <div className="flex-1 space-y-6 p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Governance Overview</h2>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="bg-card border-border shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center gap-2 text-primary">
-              <LayoutDashboard className="h-5 w-5" />
-              Visão Geral
-            </CardTitle>
-            <CardDescription>Resumo das suas atividades recentes</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg bg-background mt-4">
-              <Activity className="h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-sm text-secondary">Nenhuma atividade recente</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-primary text-primary-foreground border-none shadow-md lg:col-span-2 relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 bg-white/10 w-48 h-48 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-10 -left-10 bg-black/10 w-48 h-48 rounded-full blur-3xl"></div>
-
-          <CardHeader className="relative z-10">
-            <CardTitle className="text-xl flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-300" />
-              Fase 1: Governança & Acessos
-            </CardTitle>
-            <CardDescription className="text-primary-foreground/80 text-base mt-2">
-              Você está acessando a simulação arquitetural do novo Business Management System da
-              Transzecão.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="relative z-10 pt-4">
-            <div className="bg-black/20 rounded-lg p-5 backdrop-blur-sm border border-white/10">
-              <div className="flex items-start gap-4">
-                <div className="p-2 bg-white/10 rounded-full mt-0.5 shrink-0">
-                  <Lock className="h-5 w-5 text-white/90" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-white mb-1.5 text-lg">
-                    Estrutura de Permissões Ativa
-                  </h4>
-                  <p className="text-sm text-white/80 leading-relaxed">
-                    O menu lateral à esquerda foi gerado dinamicamente com base no seu perfil de{' '}
-                    <strong className="text-white font-semibold">"{roleName}"</strong>. Módulos
-                    específicos aparecerão bloqueados e estão previstos para as próximas fases de
-                    desenvolvimento do sistema.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-3">
+        {stats.map((stat, i) => {
+          const Icon = stat.icon
+          return (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
+                <Icon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{loading ? '-' : stat.value}</div>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
 
-      <div className="pt-4">
-        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-          Mural de Atualizações
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            {
-              id: 1,
-              title: 'Atualização de Módulo Financeiro',
-              desc: 'O módulo entrará em fase de testes fechados na próxima semana.',
-              days: 2,
-            },
-            {
-              id: 2,
-              title: 'Nova Política de Acessos',
-              desc: 'A hierarquia de visualização de formulários foi atualizada para supervisores.',
-              days: 5,
-            },
-          ].map((item) => (
-            <div
-              key={item.id}
-              className="flex gap-4 p-5 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Bell className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h4 className="font-medium text-foreground">{item.title}</h4>
-                <p className="text-sm text-secondary mt-1 leading-relaxed">{item.desc}</p>
-                <span className="text-xs font-medium text-muted-foreground mt-3 block uppercase tracking-wider">
-                  Há {item.days} dias
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>System Users</CardTitle>
+          <CardDescription>
+            Manage user access and profile assignments across the enterprise.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Profile Role</TableHead>
+                <TableHead>Sector</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center">
+                    Loading governance data...
+                  </TableCell>
+                </TableRow>
+              ) : users.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                    No users found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <UserCog className="h-4 w-4" />
+                      </div>
+                      {user.name || 'Unnamed User'}
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      {user.expand?.profile_id ? (
+                        <Badge variant="default" className="bg-primary/90">
+                          {user.expand.profile_id.name}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground">
+                          No Profile Assigned
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {user.sector || 'Not Assigned'}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   )
 }
