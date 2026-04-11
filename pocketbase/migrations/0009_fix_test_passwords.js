@@ -26,7 +26,7 @@ migrate(
     for (const email of emails) {
       try {
         const record = app.findAuthRecordByEmail('users', email)
-        record.setPassword('123456')
+        record.setPassword('12345678')
         app.save(record)
       } catch (_) {
         // Skip safely
