@@ -1,50 +1,36 @@
-import { useAuth } from '@/hooks/use-auth'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Activity, List } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ClipboardList, Target } from 'lucide-react'
 
 export default function DashboardSubFuncao() {
-  const { user } = useAuth()
   return (
-    <div className="flex-1 space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight text-primary">
-        Bem-vindo, {user?.name || 'Sub-função'}
-      </h2>
+    <div className="space-y-6 animate-fade-in-up">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Painel de Apoio</h1>
+        <p className="text-muted-foreground">Acompanhamento das tarefas e objetivos delegados.</p>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="shadow-md transition-all hover:shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lançamentos Assistidos</CardTitle>
-            <Activity className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium">Tarefas Ativas</CardTitle>
+            <ClipboardList className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">14</div>
-            <p className="text-xs text-secondary">nesta semana</p>
+            <div className="text-2xl font-bold">5</div>
+            <p className="text-xs text-muted-foreground">Processos em andamento</p>
           </CardContent>
         </Card>
-
-        <Card>
+        <Card className="shadow-md transition-all hover:shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tarefas Pendentes</CardTitle>
-            <List className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium">Objetivos Concluídos</CardTitle>
+            <Target className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">2</div>
-            <p className="text-xs text-secondary">requerem atenção</p>
+            <div className="text-2xl font-bold">14</div>
+            <p className="text-xs text-muted-foreground">Registrados nesta semana</p>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Atividades Restritas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-secondary">
-            Você está acessando o sistema com perfil de sub-função. Suas ações estão limitadas aos
-            lançamentos assistidos.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   )
 }

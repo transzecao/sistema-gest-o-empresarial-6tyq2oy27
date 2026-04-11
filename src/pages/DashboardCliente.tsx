@@ -1,61 +1,46 @@
-import { useAuth } from '@/hooks/use-auth'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { ShoppingCart, Map, Clock } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Package, Truck, CheckCircle } from 'lucide-react'
 
 export default function DashboardCliente() {
-  const { user } = useAuth()
   return (
-    <div className="flex-1 space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight text-primary">
-        Bem-vindo, {user?.name || 'Cliente'}
-      </h2>
+    <div className="space-y-6 animate-fade-in-up">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Portal do Cliente</h1>
+        <p className="text-muted-foreground">Acompanhamento e rastreio de pedidos e entregas.</p>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="shadow-md transition-all hover:shadow-lg border-t-4 border-t-primary">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pedidos Ativos</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-primary" />
+            <Package className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">2</div>
-            <p className="text-xs text-secondary">em trânsito</p>
+            <div className="text-2xl font-bold">3</div>
+            <p className="text-xs text-muted-foreground">Em fase de processamento</p>
           </CardContent>
         </Card>
-
-        <Card>
+        <Card className="shadow-md transition-all hover:shadow-lg border-t-4 border-t-blue-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Última Atualização</CardTitle>
-            <Map className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium">Em Rota de Entrega</CardTitle>
+            <Truck className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">Hoje, 09:41</div>
-            <p className="text-xs text-secondary">São Paulo, SP</p>
+            <div className="text-2xl font-bold">1</div>
+            <p className="text-xs text-muted-foreground">Com previsão para hoje</p>
           </CardContent>
         </Card>
-
-        <Card>
+        <Card className="shadow-md transition-all hover:shadow-lg border-t-4 border-t-green-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Histórico</CardTitle>
-            <Clock className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium">Entregues</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">45</div>
-            <p className="text-xs text-secondary">entregas concluídas</p>
+            <div className="text-2xl font-bold">42</div>
+            <p className="text-xs text-muted-foreground">Histórico total no sistema</p>
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Portal do Cliente</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-secondary">
-            Acompanhe seus pedidos em tempo real e acesse o histórico completo de serviços prestados
-            pela Transzecão.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   )
 }
