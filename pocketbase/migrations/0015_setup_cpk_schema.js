@@ -337,6 +337,20 @@ migrate(
     app.save(cpkCalc)
 
     // 9. Deduplicate before unique constraints
+    // Ensure columns exist in SQLite to prevent "no such column" errors during index creation
+    try {
+      app.db().newQuery("ALTER TABLE drivers ADD COLUMN `cpf` TEXT DEFAULT ''").execute()
+    } catch (e) {}
+    try {
+      app.db().newQuery("ALTER TABLE vehicles ADD COLUMN `plate` TEXT DEFAULT ''").execute()
+    } catch (e) {}
+    try {
+      app
+        .db()
+        .newQuery("ALTER TABLE cpk_calculations ADD COLUMN `document_id` TEXT DEFAULT ''")
+        .execute()
+    } catch (e) {}
+
     try {
       app
         .db()
@@ -364,12 +378,12 @@ migrate(
 
     // 10. Indexes
     drivers = app.findCollectionByNameOrId('drivers')
-    drivers.addIndex('idx_drivers_cpf', true, 'cpf', "cpf != '' AND cpf IS NOT NULL")
+    drivers.addIndex('idx_drivers_cpf', true, 'cpf', "`cpf` != '' AND `cpf` IS NOT NULL")
     drivers.addIndex('idx_drivers_name', false, 'name', '')
     app.save(drivers)
 
     vehicles = app.findCollectionByNameOrId('vehicles')
-    vehicles.addIndex('idx_vehicles_plate', true, 'plate', "plate != '' AND plate IS NOT NULL")
+    vehicles.addIndex('idx_vehicles_plate', true, 'plate', "`plate` != '' AND `plate` IS NOT NULL")
     app.save(vehicles)
 
     vinculos = app.findCollectionByNameOrId('vinculos')
