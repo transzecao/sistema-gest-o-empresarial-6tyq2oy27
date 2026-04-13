@@ -68,7 +68,7 @@ export function AdminBackupRestore() {
         <Button onClick={handleExport} className="gap-2 h-24" variant="outline">
           <Download className="w-6 h-6 text-primary" />
           <div className="flex flex-col items-start text-left">
-            <span className="font-bold">Exportar Dados</span>
+            <span className="font-bold">Exportar Dados Locais</span>
             <span className="text-xs text-muted-foreground">Salvar .json localmente</span>
           </div>
         </Button>
@@ -80,7 +80,7 @@ export function AdminBackupRestore() {
         >
           <Upload className="w-6 h-6 text-primary" />
           <div className="flex flex-col items-start text-left">
-            <span className="font-bold">Importar Dados</span>
+            <span className="font-bold">Restaurar Backup</span>
             <span className="text-xs text-muted-foreground">Carregar arquivo .json</span>
           </div>
         </Button>

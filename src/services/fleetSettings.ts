@@ -1,5 +1,20 @@
 import pb from '@/lib/pocketbase/client'
 
+export interface LaborCharges {
+  max_das?: number
+  cte_cost?: number
+  monthly_docs?: number
+  fiscal_taxes?: number
+  working_days?: number
+  vr_daily?: number
+  basic_basket?: number
+  fgts?: number
+  thirteenth?: number
+  vacation?: number
+  pis?: number
+  [key: string]: number | undefined
+}
+
 export interface FleetSettings {
   id: string
   das_rate: number
@@ -8,7 +23,7 @@ export interface FleetSettings {
   max_cpk: number
   fuel_price: number
   default_consumption: number
-  labor_charges: Record<string, number>
+  labor_charges: LaborCharges
 }
 
 export async function getFleetSettings(): Promise<FleetSettings | null> {

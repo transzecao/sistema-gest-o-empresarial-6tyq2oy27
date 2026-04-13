@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export function AdminAuditHistory() {
   const [logs, setLogs] = useState<any[]>([])
@@ -28,7 +28,6 @@ export function AdminAuditHistory() {
 
   const [filterUser, setFilterUser] = useState('')
   const [filterAction, setFilterAction] = useState('ALL')
-  const [filterStatus, setFilterStatus] = useState('ALL')
 
   useEffect(() => {
     getAuditLogs().then((data) => {
@@ -43,42 +42,24 @@ export function AdminAuditHistory() {
         ? log.expand?.user_id?.name?.toLowerCase().includes(filterUser.toLowerCase())
         : true
       const matchAction = filterAction !== 'ALL' ? log.action === filterAction : true
-      const matchStatus = filterStatus !== 'ALL' ? log.status === filterStatus : true
-      return matchUser && matchAction && matchStatus
+      return matchUser && matchAction
     })
-  }, [logs, filterUser, filterAction, filterStatus])
+  }, [logs, filterUser, filterAction])
 
   const exportCSV = () => {
-    const headers = [
-      'Data',
-      'Usuário',
-      'Role',
-      'Ação',
-      'Recurso',
-      'Detalhes',
-      'Status',
-      'Motivo',
-      'Valor Antigo',
-      'Novo Valor',
-    ]
+    const headers = ['Data', 'Usuário', 'Ação', 'Parâmetro', 'De → Para']
     const rows = filteredLogs.map((log) => [
       format(new Date(log.created), 'dd/MM/yyyy HH:mm:ss'),
       log.expand?.user_id?.name || 'Sistema',
-      log.role || '',
       log.action,
-      log.resource_type,
-      log.details ? JSON.stringify(log.details) : '',
-      log.status || 'SUCCESS',
-      log.reason || '',
-      log.old_value || '',
-      log.new_value || '',
+      log.details?.parameter || log.resource_type || '-',
+      `${log.old_value || '-'} → ${log.new_value || '-'}`,
     ])
 
     const csvContent = [
       headers.join(','),
       ...rows.map((e) => e.map((f) => `"${String(f).replace(/"/g, '""')}"`).join(',')),
     ].join('\n')
-
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -121,85 +102,52 @@ export function AdminAuditHistory() {
             <SelectContent>
               <SelectItem value="ALL">Todas as Ações</SelectItem>
               {actions.map((a) => (
-                <SelectItem key={a} value={a as string}>
+                <SelectItem key={a as string} value={a as string}>
                   {a as string}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Todos Status</SelectItem>
-              <SelectItem value="SUCCESS">Sucesso</SelectItem>
-              <SelectItem value="FAILED">Falha</SelectItem>
-              <SelectItem value="UNAUTHORIZED">Não Autorizado</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
         <Button onClick={exportCSV} variant="outline" size="sm" className="gap-2">
-          <Download className="w-4 h-4" />
-          Exportar CSV
+          <Download className="w-4 h-4" /> Exportar CSV
         </Button>
       </div>
 
       {filteredLogs.length === 0 ? (
         <p className="text-muted-foreground text-center py-8">Nenhum registro encontrado.</p>
       ) : (
-        <div className="border rounded-md">
+        <ScrollArea className="h-[400px] border rounded-md bg-card">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Data</TableHead>
+                <TableHead className="whitespace-nowrap">Data</TableHead>
                 <TableHead>Usuário</TableHead>
                 <TableHead>Ação</TableHead>
-                <TableHead>Recurso</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Detalhes</TableHead>
+                <TableHead>Parâmetro</TableHead>
+                <TableHead>De → Para</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredLogs.map((log) => (
                 <TableRow key={log.id}>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className="whitespace-nowrap font-mono text-xs">
                     {format(new Date(log.created), 'dd/MM/yyyy HH:mm')}
                   </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{log.expand?.user_id?.name || 'Sistema'}</span>
-                      <span className="text-xs text-muted-foreground">{log.role}</span>
-                    </div>
+                  <TableCell className="font-medium text-sm">
+                    {log.expand?.user_id?.name || 'Sistema'}
                   </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="font-mono text-xs">
-                      {log.action}
-                    </Badge>
+                  <TableCell className="text-sm">{log.action}</TableCell>
+                  <TableCell className="text-sm font-mono">
+                    {log.details?.parameter || log.resource_type || '-'}
                   </TableCell>
-                  <TableCell className="text-sm">{log.resource_type}</TableCell>
-                  <TableCell>
-                    {log.status === 'SUCCESS' && (
-                      <Badge className="bg-emerald-500 hover:bg-emerald-600">Sucesso</Badge>
-                    )}
-                    {log.status === 'FAILED' && <Badge variant="destructive">Falha</Badge>}
-                    {log.status === 'UNAUTHORIZED' && (
-                      <Badge variant="destructive" className="bg-amber-500">
-                        Não Autorizado
-                      </Badge>
-                    )}
-                    {!log.status && <Badge variant="secondary">Info</Badge>}
-                  </TableCell>
-                  <TableCell className="text-xs max-w-[200px] truncate">
-                    {log.old_value && log.new_value ? (
-                      <div className="flex flex-col">
-                        <span className="text-red-500 line-through">{log.old_value}</span>
-                        <span className="text-emerald-600">→ {log.new_value}</span>
+                  <TableCell className="text-sm">
+                    {log.old_value || log.new_value ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-red-500 line-through">{log.old_value || '-'}</span>
+                        <span className="text-muted-foreground">→</span>
+                        <span className="text-emerald-600 font-medium">{log.new_value || '-'}</span>
                       </div>
-                    ) : log.reason ? (
-                      <span className="text-destructive" title={log.reason}>
-                        {log.reason}
-                      </span>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
@@ -208,7 +156,7 @@ export function AdminAuditHistory() {
               ))}
             </TableBody>
           </Table>
-        </div>
+        </ScrollArea>
       )}
     </div>
   )
