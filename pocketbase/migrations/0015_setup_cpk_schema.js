@@ -1,38 +1,48 @@
 migrate(
   (app) => {
     // 1. Deduplicate existing records before adding unique constraints
-    app
-      .db()
-      .newQuery(
-        `DELETE FROM drivers WHERE id NOT IN (SELECT MIN(id) FROM drivers GROUP BY cpf) AND cpf IS NOT NULL AND cpf != ''`,
-      )
-      .execute()
-    app
-      .db()
-      .newQuery(
-        `DELETE FROM drivers WHERE id NOT IN (SELECT MIN(id) FROM drivers GROUP BY local_id) AND local_id IS NOT NULL AND local_id != ''`,
-      )
-      .execute()
+    try {
+      app
+        .db()
+        .newQuery(
+          `DELETE FROM drivers WHERE id NOT IN (SELECT MIN(id) FROM drivers GROUP BY cpf) AND cpf IS NOT NULL AND cpf != ''`,
+        )
+        .execute()
+    } catch (e) {}
+    try {
+      app
+        .db()
+        .newQuery(
+          `DELETE FROM drivers WHERE id NOT IN (SELECT MIN(id) FROM drivers GROUP BY local_id) AND local_id IS NOT NULL AND local_id != ''`,
+        )
+        .execute()
+    } catch (e) {}
 
-    app
-      .db()
-      .newQuery(
-        `DELETE FROM vehicles WHERE id NOT IN (SELECT MIN(id) FROM vehicles GROUP BY plate) AND plate IS NOT NULL AND plate != ''`,
-      )
-      .execute()
-    app
-      .db()
-      .newQuery(
-        `DELETE FROM vehicles WHERE id NOT IN (SELECT MIN(id) FROM vehicles GROUP BY local_id) AND local_id IS NOT NULL AND local_id != ''`,
-      )
-      .execute()
+    try {
+      app
+        .db()
+        .newQuery(
+          `DELETE FROM vehicles WHERE id NOT IN (SELECT MIN(id) FROM vehicles GROUP BY plate) AND plate IS NOT NULL AND plate != ''`,
+        )
+        .execute()
+    } catch (e) {}
+    try {
+      app
+        .db()
+        .newQuery(
+          `DELETE FROM vehicles WHERE id NOT IN (SELECT MIN(id) FROM vehicles GROUP BY local_id) AND local_id IS NOT NULL AND local_id != ''`,
+        )
+        .execute()
+    } catch (e) {}
 
-    app
-      .db()
-      .newQuery(
-        `DELETE FROM vinculos WHERE id NOT IN (SELECT MIN(id) FROM vinculos GROUP BY local_id) AND local_id IS NOT NULL AND local_id != ''`,
-      )
-      .execute()
+    try {
+      app
+        .db()
+        .newQuery(
+          `DELETE FROM vinculos WHERE id NOT IN (SELECT MIN(id) FROM vinculos GROUP BY local_id) AND local_id IS NOT NULL AND local_id != ''`,
+        )
+        .execute()
+    } catch (e) {}
 
     // 2. Update Drivers
     const drivers = app.findCollectionByNameOrId('drivers')
