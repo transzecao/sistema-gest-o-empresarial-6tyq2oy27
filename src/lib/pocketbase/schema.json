@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-13T14:43:40.591Z",
+  "generatedAt": "2026-04-13T14:53:36.253Z",
   "collections": [
     {
       "name": "users",
@@ -287,6 +287,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "deleted_at",
+          "type": "date",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -327,6 +333,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "deleted_at",
+          "type": "date",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -373,6 +385,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "deleted_at",
+          "type": "date",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []

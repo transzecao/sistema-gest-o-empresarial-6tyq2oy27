@@ -1,5 +1,6 @@
 import { FleetCostsForm } from '@/components/cpk/FleetCostsForm'
 import { AdminPanelDialog } from '@/components/cpk/admin/AdminPanelDialog'
+import { MonthlySnapshots } from '@/components/cpk/MonthlySnapshots'
 
 export default function DashboardSupervisor() {
   return (
@@ -19,6 +20,7 @@ export default function DashboardSupervisor() {
 
       <div className="grid gap-6">
         <FleetCostsForm />
+        <MonthlySnapshots />
       </div>
     </div>
   )

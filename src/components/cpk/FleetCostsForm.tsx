@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useRoleValidation } from '@/hooks/use-role-validation'
+import { useAuth } from '@/hooks/use-auth'
 import { createAuditLog } from '@/services/auditLog'
 import { syncMasterData } from '@/services/cpkSync'
 import { useToast } from '@/hooks/use-toast'
@@ -11,6 +12,7 @@ import { Label } from '@/components/ui/label'
 
 export function FleetCostsForm() {
   const { canOperate, isReady } = useRoleValidation()
+  const { user } = useAuth()
   const { toast } = useToast()
   const [isProcessing, setIsProcessing] = useState(false)
   const hasLoggedUnauthorized = useRef(false)
@@ -49,8 +51,8 @@ export function FleetCostsForm() {
           </div>
           <h2 className="text-xl font-bold text-destructive mb-2">Acesso Restrito</h2>
           <p className="text-sm text-destructive/90">
-            Você não tem permissão para acessar o cálculo de CPK. Apenas funcionários ou
-            supervisores financeiros podem operar esta tela.
+            Você não tem permissão para acessar o cálculo de CPK. Apenas Funcionários Financeiros
+            podem operar esta tela.
           </p>
         </CardContent>
       </Card>
@@ -92,7 +94,7 @@ export function FleetCostsForm() {
 
       toast({
         title: 'Mês Fechado com Sucesso',
-        description: `Dados sincronizados. Documento gerado: ${docId}`,
+        description: `Doc: ${docId}\nAutor: ${user?.name || 'Sistema'}\nData: ${new Date().toLocaleString()}`,
       })
     } catch (error: any) {
       const reason = error?.message || 'Erro desconhecido ao processar'

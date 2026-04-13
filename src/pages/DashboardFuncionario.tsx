@@ -1,4 +1,5 @@
 import { FleetCostsForm } from '@/components/cpk/FleetCostsForm'
+import { MonthlySnapshots } from '@/components/cpk/MonthlySnapshots'
 
 export default function DashboardFuncionario() {
   return (
@@ -13,6 +14,7 @@ export default function DashboardFuncionario() {
 
       <div className="grid gap-6">
         <FleetCostsForm />
+        <MonthlySnapshots />
       </div>
     </div>
   )

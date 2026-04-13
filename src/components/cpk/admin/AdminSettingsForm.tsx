@@ -29,12 +29,12 @@ import { AlertTriangle } from 'lucide-react'
 
 const formSchema = z
   .object({
-    das_rate: z.coerce.number().min(0).max(100),
-    min_margin: z.coerce.number().min(0).max(100),
-    warning_margin: z.coerce.number().min(0).max(100),
-    max_cpk: z.coerce.number().min(0.01).max(999.99),
-    fuel_price: z.coerce.number().min(0.01),
-    default_consumption: z.coerce.number().min(0.1),
+    das_rate: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%'),
+    min_margin: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%'),
+    warning_margin: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%'),
+    max_cpk: z.coerce.number().min(0.01, 'Mínimo R$ 0.01').max(999.99, 'Máximo R$ 999.99'),
+    fuel_price: z.coerce.number().min(0.01, 'Mínimo R$ 0.01'),
+    default_consumption: z.coerce.number().min(0.1, 'Mínimo 0.1 km/l'),
   })
   .refine((data) => data.warning_margin >= data.min_margin, {
     message: 'Margem Amarela não pode ser menor que a Margem Mínima',

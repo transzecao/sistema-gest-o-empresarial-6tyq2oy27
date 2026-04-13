@@ -22,7 +22,7 @@ export function useRoleValidation() {
     return {
       canConfigure: isSupervisor,
       canViewAudit: isSupervisor,
-      canOperate: isFuncionario || isSupervisor, // Operational tasks are allowed for both
+      canOperate: isFuncionario, // Operational tasks are allowed ONLY for Funcionario
       isReady: true,
     }
   }, [user, loading])
