@@ -1,5 +1,32 @@
 migrate(
   (app) => {
+    const db = app.db()
+
+    // 0. Ensure columns exist before any app.save() to prevent index validation errors
+    // If a collection already has an index pointing to a column that was lost or not created
+    // in SQLite, app.save() will crash during index validation with "no such column".
+    const colsToEnsure = [
+      ['audit_logs', 'user_id'],
+      ['audit_logs', 'action'],
+      ['audit_logs', 'resource_type'],
+      ['drivers', 'cpf'],
+      ['drivers', 'local_id'],
+      ['drivers', 'name'],
+      ['vehicles', 'plate'],
+      ['vehicles', 'local_id'],
+      ['vinculos', 'local_id'],
+      ['vinculos', 'driver_id'],
+      ['vinculos', 'vehicle_id'],
+      ['cpk_calculations', 'user_id'],
+      ['cpk_calculations', 'month_year'],
+      ['cpk_calculations', 'document_id'],
+    ]
+    colsToEnsure.forEach(([t, c]) => {
+      try {
+        db.newQuery(`ALTER TABLE ${t} ADD COLUMN ${c} TEXT DEFAULT ''`).execute()
+      } catch (e) {}
+    })
+
     // 1. Audit Logs Update
     let auditLogs = app.findCollectionByNameOrId('audit_logs')
 
@@ -324,7 +351,6 @@ migrate(
     }
 
     // 9. Deduplicate & Indexes
-    const db = app.db()
 
     // Deduplicate
     try {
