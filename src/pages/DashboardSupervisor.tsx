@@ -1,45 +1,20 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle2, Clock, AlertCircle } from 'lucide-react'
+import { FleetCostsForm } from '@/components/cpk/FleetCostsForm'
 
 export default function DashboardSupervisor() {
   return (
-    <div className="space-y-6 animate-fade-in-up">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Painel do Supervisor</h1>
-        <p className="text-muted-foreground">Gestão de equipe e aprovações pendentes.</p>
+    <div className="container mx-auto p-4 md:p-6 lg:p-8 animate-fade-in">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Portal do Supervisor Financeiro
+        </h1>
+        <p className="text-muted-foreground mt-2 max-w-2xl">
+          Área de supervisão e auditoria. Verifique os indicadores da equipe e gerencie fechamentos
+          excepcionais de frota.
+        </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="shadow-md transition-all hover:shadow-lg border-l-4 border-l-yellow-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aprovações Pendentes</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">Formulários aguardando revisão</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-md transition-all hover:shadow-lg border-l-4 border-l-green-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Concluídos Hoje</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">45</div>
-            <p className="text-xs text-muted-foreground">Aprovações finalizadas</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-md transition-all hover:shadow-lg border-l-4 border-l-red-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Alertas da Equipe</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">Atenção imediata requerida</p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-6">
+        <FleetCostsForm />
       </div>
     </div>
   )
