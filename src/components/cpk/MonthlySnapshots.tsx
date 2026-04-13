@@ -69,7 +69,9 @@ export function MonthlySnapshots() {
                   cpk = `R$ ${parsed.cpk?.toFixed(2)}`
                   margin = `${parsed.margin?.toFixed(1)}%`
                 }
-              } catch (e) {}
+              } catch (e) {
+                // Ignore parsing errors
+              }
 
               return (
                 <TableRow key={log.id}>
