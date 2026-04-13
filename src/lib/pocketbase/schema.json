@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-13T16:19:16.058Z",
+  "generatedAt": "2026-04-13T16:29:33.388Z",
   "collections": [
     {
       "name": "users",
@@ -339,6 +339,90 @@
           "type": "date",
           "required": false,
           "system": false
+        },
+        {
+          "name": "purchase_value",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "resale_value",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "brand_model",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "year",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "vehicle_type",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "consumption",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "diesel_price",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "ipva",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "licensing",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "insurance",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "tire_cost",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "maintenance",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cleaning",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "arla_32",
+          "type": "bool",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -389,6 +473,12 @@
         {
           "name": "deleted_at",
           "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "estimated_km",
+          "type": "number",
           "required": false,
           "system": false
         }
@@ -461,6 +551,18 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "hq_costs",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "taxes_config",
+          "type": "json",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []

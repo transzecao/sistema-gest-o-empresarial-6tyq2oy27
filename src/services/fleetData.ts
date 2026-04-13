@@ -12,6 +12,20 @@ export interface Vehicle {
   id: string
   local_id: string
   plate: string
+  purchase_value?: number
+  resale_value?: number
+  brand_model?: string
+  year?: number
+  vehicle_type?: string
+  consumption?: number
+  diesel_price?: number
+  ipva?: number
+  licensing?: number
+  insurance?: number
+  tire_cost?: number
+  maintenance?: number
+  cleaning?: number
+  arla_32?: boolean
   deleted_at?: string
 }
 
@@ -20,6 +34,7 @@ export interface Vinculo {
   local_id: string
   driver_id: string
   vehicle_id: string
+  estimated_km?: number
   deleted_at?: string
 }
 
@@ -48,6 +63,20 @@ export async function createDriver(data: Partial<Driver>) {
     resource_type: 'DRIVER',
     resource_id: record.id,
     new_value: record.name,
+    status: 'SUCCESS',
+  })
+  return record
+}
+
+export async function updateVehicle(id: string, data: Partial<Vehicle>) {
+  const oldRecord = await pb.collection('vehicles').getOne<Vehicle>(id)
+  const record = await pb.collection('vehicles').update<Vehicle>(id, data)
+  await createAuditLog({
+    action: 'UPDATE_VEHICLE',
+    resource_type: 'VEHICLE',
+    resource_id: record.id,
+    old_value: JSON.stringify(oldRecord),
+    new_value: JSON.stringify(record),
     status: 'SUCCESS',
   })
   return record
