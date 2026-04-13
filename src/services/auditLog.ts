@@ -16,6 +16,22 @@ export interface AuditLogPayload {
  * Centralized service to log successes, failures, and unauthorized access attempts.
  * Automatically captures the current authenticated user's ID and role.
  */
+export async function logUnauthorizedAccess(action: string, details?: any) {
+  return createAuditLog({
+    action,
+    resource_type: 'SYSTEM',
+    status: 'UNAUTHORIZED',
+    details,
+  })
+}
+
+export async function getAuditLogs() {
+  return pb.collection('audit_logs').getFullList({
+    sort: '-created',
+    expand: 'user_id',
+  })
+}
+
 export async function createAuditLog(payload: AuditLogPayload) {
   const user = pb.authStore.record
   if (!user) {
