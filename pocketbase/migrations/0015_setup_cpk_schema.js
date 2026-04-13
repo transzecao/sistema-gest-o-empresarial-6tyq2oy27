@@ -21,6 +21,8 @@ migrate(
     // 2. Drivers Update
     let drivers = app.findCollectionByNameOrId('drivers')
     const driverFields = [
+      { name: 'name', type: 'text' },
+      { name: 'cpf', type: 'text' },
       { name: 'cnh', type: 'text' },
       { name: 'base_salary', type: 'number' },
       { name: 'periculosidade', type: 'bool' },
@@ -60,6 +62,7 @@ migrate(
     })
 
     const vehicleFields = [
+      { name: 'plate', type: 'text' },
       { name: 'model', type: 'text' },
       { name: 'seguro_casco', type: 'number' },
       { name: 'rctrc', type: 'number' },
