@@ -326,26 +326,6 @@ migrate(
     // 9. Deduplicate & Indexes
     const db = app.db()
 
-    // Safety ALTERS
-    try {
-      db.newQuery("ALTER TABLE drivers ADD COLUMN `cpf` TEXT DEFAULT ''").execute()
-    } catch (e) {}
-    try {
-      db.newQuery("ALTER TABLE drivers ADD COLUMN `local_id` TEXT DEFAULT ''").execute()
-    } catch (e) {}
-    try {
-      db.newQuery("ALTER TABLE vehicles ADD COLUMN `plate` TEXT DEFAULT ''").execute()
-    } catch (e) {}
-    try {
-      db.newQuery("ALTER TABLE vehicles ADD COLUMN `local_id` TEXT DEFAULT ''").execute()
-    } catch (e) {}
-    try {
-      db.newQuery("ALTER TABLE vinculos ADD COLUMN `local_id` TEXT DEFAULT ''").execute()
-    } catch (e) {}
-    try {
-      db.newQuery("ALTER TABLE cpk_calculations ADD COLUMN `document_id` TEXT DEFAULT ''").execute()
-    } catch (e) {}
-
     // Deduplicate
     try {
       db.newQuery(
@@ -389,23 +369,23 @@ migrate(
     app.save(auditLogs)
 
     drivers = app.findCollectionByNameOrId('drivers')
-    drivers.addIndex('idx_drivers_cpf', true, 'cpf', "`cpf` != '' AND `cpf` IS NOT NULL")
+    drivers.addIndex('idx_drivers_cpf', true, 'cpf', "cpf != '' AND cpf IS NOT NULL")
     drivers.addIndex(
       'idx_drivers_local_id',
       true,
       'local_id',
-      "`local_id` != '' AND `local_id` IS NOT NULL",
+      "local_id != '' AND local_id IS NOT NULL",
     )
     drivers.addIndex('idx_drivers_name', false, 'name', '')
     app.save(drivers)
 
     vehicles = app.findCollectionByNameOrId('vehicles')
-    vehicles.addIndex('idx_vehicles_plate', true, 'plate', "`plate` != '' AND `plate` IS NOT NULL")
+    vehicles.addIndex('idx_vehicles_plate', true, 'plate', "plate != '' AND plate IS NOT NULL")
     vehicles.addIndex(
       'idx_vehicles_local_id',
       true,
       'local_id',
-      "`local_id` != '' AND `local_id` IS NOT NULL",
+      "local_id != '' AND local_id IS NOT NULL",
     )
     app.save(vehicles)
 
@@ -414,7 +394,7 @@ migrate(
       'idx_vinculos_local_id',
       true,
       'local_id',
-      "`local_id` != '' AND `local_id` IS NOT NULL",
+      "local_id != '' AND local_id IS NOT NULL",
     )
     vinculos.addIndex('idx_vinculos_driver_id', false, 'driver_id', '')
     vinculos.addIndex('idx_vinculos_vehicle_id', false, 'vehicle_id', '')
@@ -427,7 +407,7 @@ migrate(
       'idx_cpk_calculations_document_id',
       true,
       'document_id',
-      "`document_id` != '' AND `document_id` IS NOT NULL",
+      "document_id != '' AND document_id IS NOT NULL",
     )
     app.save(cpkCalc)
   },
