@@ -34,6 +34,7 @@ export function DriverTab() {
       const data = await getDrivers()
       setDrivers(data)
     } catch (err) {
+      console.error('Error loading drivers:', err)
       toast({ variant: 'destructive', title: 'Erro ao carregar motoristas' })
     } finally {
       setLoading(false)
@@ -41,7 +42,14 @@ export function DriverTab() {
   }
 
   const handleAddDriver = async () => {
-    if (!newDriverName || !newDriverLocalId) return
+    if (!newDriverName.trim() || !newDriverLocalId.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Campos obrigatórios',
+        description: 'Preencha o nome e a matrícula do motorista.',
+      })
+      return
+    }
     try {
       const newDriver = await createDriver({ name: newDriverName, local_id: newDriverLocalId })
       setDrivers([...drivers, newDriver])
@@ -49,16 +57,30 @@ export function DriverTab() {
       setNewDriverLocalId('')
       toast({ title: 'Motorista adicionado com sucesso!' })
     } catch (err: any) {
+      console.error('Error adding driver:', err)
       toast({ variant: 'destructive', title: 'Erro ao adicionar', description: err.message })
     }
   }
 
-  const handleRemoveDriver = async (id: string) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleAddDriver()
+    }
+  }
+
+  const handleRemoveDriver = async (id: string, name: string) => {
+    if (
+      !window.confirm(`Tem certeza que deseja remover ${name}? Esta ação não pode ser desfeita.`)
+    ) {
+      return
+    }
     try {
       await softDeleteDriver(id)
       setDrivers(drivers.filter((d) => d.id !== id))
       toast({ title: 'Motorista removido com sucesso!' })
     } catch (err: any) {
+      console.error('Error removing driver:', err)
       toast({ variant: 'destructive', title: 'Erro ao remover', description: err.message })
     }
   }
@@ -98,25 +120,28 @@ export function DriverTab() {
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="space-y-2 w-full">
-              <Label>Nome Completo</Label>
+              <Label htmlFor="driver-name">Nome Completo</Label>
               <Input
+                id="driver-name"
                 value={newDriverName}
                 onChange={(e) => setNewDriverName(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Ex: João Silva"
               />
             </div>
             <div className="space-y-2 w-full">
-              <Label>Matrícula / ID Local</Label>
+              <Label htmlFor="driver-local-id">Matrícula / ID Local</Label>
               <Input
+                id="driver-local-id"
                 value={newDriverLocalId}
                 onChange={(e) => setNewDriverLocalId(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Ex: MOT-001"
               />
             </div>
             <Button
               onClick={handleAddDriver}
-              disabled={!newDriverName || !newDriverLocalId}
-              className="w-full md:w-auto shrink-0"
+              className={`w-full md:w-auto shrink-0 ${!newDriverName.trim() || !newDriverLocalId.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Plus className="w-4 h-4 mr-2" /> Adicionar
             </Button>
@@ -126,7 +151,7 @@ export function DriverTab() {
 
       <div className="space-y-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <User className="w-5 h-5 text-primary" /> Motoristas Ativos
+          <User className="w-5 h-5 text-primary" /> Motoristas Ativos ({drivers.length})
         </h3>
 
         {drivers.length === 0 ? (
@@ -154,8 +179,9 @@ export function DriverTab() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleRemoveDriver(driver.id)}
+                        onClick={() => handleRemoveDriver(driver.id, driver.name)}
                         title="Remover Motorista"
+                        className="hover:bg-destructive/10 hover:text-destructive"
                       >
                         <Trash2 className="w-4 h-4 text-destructive" />
                       </Button>
