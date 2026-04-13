@@ -1,39 +1,339 @@
 migrate(
   (app) => {
-    // 1. Update Drivers fields
+    // 1. Audit Logs Update
+    let auditLogs = app.findCollectionByNameOrId('audit_logs')
+    if (!auditLogs.fields.getByName('timestamp'))
+      auditLogs.fields.add(new DateField({ name: 'timestamp' }))
+    if (!auditLogs.fields.getByName('ip_address'))
+      auditLogs.fields.add(new TextField({ name: 'ip_address' }))
+
+    ;['old_value', 'new_value'].forEach((name) => {
+      let field = auditLogs.fields.getByName(name)
+      if (field && field.type === 'text') {
+        auditLogs.fields.removeByName(name)
+        auditLogs.fields.add(new JSONField({ name: name }))
+      } else if (!field) {
+        auditLogs.fields.add(new JSONField({ name: name }))
+      }
+    })
+    app.save(auditLogs)
+
+    // 2. Drivers Update
     let drivers = app.findCollectionByNameOrId('drivers')
-    if (!drivers.fields.getByName('cpf')) {
-      drivers.fields.add(
-        new TextField({ name: 'cpf', pattern: '^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$' }),
-      )
-    }
-    if (!drivers.fields.getByName('base_salary')) {
-      drivers.fields.add(new NumberField({ name: 'base_salary' }))
-    }
-    if (!drivers.fields.getByName('encargos')) {
-      drivers.fields.add(new JSONField({ name: 'encargos' }))
-    }
+    const driverFields = [
+      { name: 'cnh', type: 'text' },
+      { name: 'base_salary', type: 'number' },
+      { name: 'periculosidade', type: 'bool' },
+      { name: 'vr_daily', type: 'number' },
+      { name: 'vt_mensal', type: 'number' },
+      { name: 'cesta_basica', type: 'number' },
+      { name: 'seguro_vida', type: 'number' },
+      { name: 'tox_anual', type: 'number' },
+      { name: 'rat', type: 'number' },
+      { name: 'encargos', type: 'json' },
+      { name: 'custom_fields', type: 'json' },
+    ]
+    driverFields.forEach((f) => {
+      if (!drivers.fields.getByName(f.name)) {
+        if (f.type === 'text') drivers.fields.add(new TextField({ name: f.name }))
+        if (f.type === 'number') drivers.fields.add(new NumberField({ name: f.name }))
+        if (f.type === 'bool') drivers.fields.add(new BoolField({ name: f.name }))
+        if (f.type === 'json') drivers.fields.add(new JSONField({ name: f.name }))
+      }
+    })
     app.save(drivers)
 
-    // 2. Update Vehicles fields
+    // 3. Vehicles Update
     let vehicles = app.findCollectionByNameOrId('vehicles')
-    const plateField = vehicles.fields.getByName('plate')
-    if (plateField) {
-      plateField.pattern = '^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$'
-    }
-    if (!vehicles.fields.getByName('consumo')) {
-      vehicles.fields.add(new NumberField({ name: 'consumo' }))
-    }
+    const vehiclesRemove = [
+      'consumption',
+      'insurance',
+      'licensing',
+      'tire_cost',
+      'maintenance',
+      'cleaning',
+      'arla_32',
+      'brand_model',
+    ]
+    vehiclesRemove.forEach((name) => {
+      if (vehicles.fields.getByName(name)) vehicles.fields.removeByName(name)
+    })
+
+    const vehicleFields = [
+      { name: 'model', type: 'text' },
+      { name: 'seguro_casco', type: 'number' },
+      { name: 'rctrc', type: 'number' },
+      { name: 'rcfdc', type: 'number' },
+      { name: 'consumo', type: 'number' },
+      { name: 'pneus_jogo', type: 'number' },
+      { name: 'km_pneus', type: 'number' },
+      { name: 'manutencao', type: 'number' },
+      { name: 'usa_arla', type: 'bool' },
+      { name: 'limpeza', type: 'number' },
+      { name: 'averbacao', type: 'number' },
+      { name: 'consulta', type: 'number' },
+      { name: 'satelite', type: 'number' },
+      { name: 'estimated_km', type: 'number' },
+      { name: 'overrides', type: 'json' },
+      { name: 'custom_fields', type: 'json' },
+      { name: 'status', type: 'text' },
+    ]
+    vehicleFields.forEach((f) => {
+      if (!vehicles.fields.getByName(f.name)) {
+        if (f.type === 'text') vehicles.fields.add(new TextField({ name: f.name }))
+        if (f.type === 'number') vehicles.fields.add(new NumberField({ name: f.name }))
+        if (f.type === 'bool') vehicles.fields.add(new BoolField({ name: f.name }))
+        if (f.type === 'json') vehicles.fields.add(new JSONField({ name: f.name }))
+      }
+    })
     app.save(vehicles)
 
-    // 3. Update Vinculos fields
+    // 4. Vinculos Update
     let vinculos = app.findCollectionByNameOrId('vinculos')
+    ;['driver_id', 'vehicle_id'].forEach((name) => {
+      let field = vinculos.fields.getByName(name)
+      if (field && field.type === 'text') {
+        vinculos.fields.removeByName(name)
+      }
+    })
+    if (!vinculos.fields.getByName('driver_id')) {
+      vinculos.fields.add(
+        new RelationField({ name: 'driver_id', collectionId: drivers.id, maxSelect: 1 }),
+      )
+    }
+    if (!vinculos.fields.getByName('vehicle_id')) {
+      vinculos.fields.add(
+        new RelationField({ name: 'vehicle_id', collectionId: vehicles.id, maxSelect: 1 }),
+      )
+    }
     if (!vinculos.fields.getByName('km_mensal')) {
       vinculos.fields.add(new NumberField({ name: 'km_mensal' }))
     }
     app.save(vinculos)
 
-    // 4. Deduplicate existing records before adding unique constraints
+    // 5. Fleet Settings -> CPK Settings
+    let cpkSettings
+    try {
+      cpkSettings = app.findCollectionByNameOrId('fleet_settings')
+      cpkSettings.name = 'cpk_settings'
+      app.save(cpkSettings)
+    } catch (_) {
+      try {
+        cpkSettings = app.findCollectionByNameOrId('cpk_settings')
+      } catch (_) {}
+    }
+    if (!cpkSettings) {
+      cpkSettings = new Collection({
+        name: 'cpk_settings',
+        type: 'base',
+        fields: [
+          { name: 'created', type: 'autodate', onCreate: true, onUpdate: false },
+          { name: 'updated', type: 'autodate', onCreate: true, onUpdate: true },
+        ],
+      })
+      app.save(cpkSettings)
+    }
+    cpkSettings.listRule = "@request.auth.id != ''"
+    cpkSettings.viewRule = "@request.auth.id != ''"
+    cpkSettings.createRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+    cpkSettings.updateRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+    cpkSettings.deleteRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+
+    const oldSettingsFields = [
+      'warning_margin',
+      'default_consumption',
+      'labor_charges',
+      'hq_costs',
+      'taxes_config',
+    ]
+    oldSettingsFields.forEach((name) => {
+      if (cpkSettings.fields.getByName(name)) cpkSettings.fields.removeByName(name)
+    })
+
+    const cpkSettingsFields = [
+      'max_cpk',
+      'min_margin',
+      'yellow_margin',
+      'max_das',
+      'das_rate',
+      'cte_cost',
+      'docs_count',
+      'taxas_fiscal',
+      'dead_km',
+      'working_days',
+      'vr_daily',
+      'cesta_basica',
+      'fuel_consumption',
+      'fuel_price',
+      'default_fgts',
+      'default_decimo',
+      'default_ferias',
+      'default_pis',
+      'var_cost_max_percent',
+    ]
+    cpkSettingsFields.forEach((name) => {
+      if (!cpkSettings.fields.getByName(name)) {
+        cpkSettings.fields.add(new NumberField({ name }))
+      }
+    })
+    app.save(cpkSettings)
+
+    // 6. HQ Costs
+    let hqCosts
+    try {
+      hqCosts = app.findCollectionByNameOrId('hq_costs')
+      ;['name', 'value', 'type'].forEach((name) => {
+        if (hqCosts.fields.getByName(name)) hqCosts.fields.removeByName(name)
+      })
+    } catch (_) {
+      hqCosts = new Collection({
+        name: 'hq_costs',
+        type: 'base',
+        fields: [
+          { name: 'created', type: 'autodate', onCreate: true, onUpdate: false },
+          { name: 'updated', type: 'autodate', onCreate: true, onUpdate: true },
+        ],
+      })
+      app.save(hqCosts)
+    }
+    hqCosts.listRule = "@request.auth.id != ''"
+    hqCosts.viewRule = "@request.auth.id != ''"
+    hqCosts.createRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+    hqCosts.updateRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+    hqCosts.deleteRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+
+    const hqCostsFields = [
+      { name: 'iptu', type: 'number' },
+      { name: 'aluguel', type: 'number' },
+      { name: 'agua', type: 'number' },
+      { name: 'luz', type: 'number' },
+      { name: 'internet', type: 'number' },
+      { name: 'telefone', type: 'number' },
+      { name: 'avcb', type: 'number' },
+      { name: 'seguro_patrimonial', type: 'number' },
+      { name: 'docas', type: 'number' },
+      { name: 'custom_fields', type: 'json' },
+    ]
+    hqCostsFields.forEach((f) => {
+      if (!hqCosts.fields.getByName(f.name)) {
+        if (f.type === 'number') hqCosts.fields.add(new NumberField({ name: f.name }))
+        if (f.type === 'json') hqCosts.fields.add(new JSONField({ name: f.name }))
+      }
+    })
+    app.save(hqCosts)
+
+    // 7. Taxes
+    let taxes
+    try {
+      taxes = app.findCollectionByNameOrId('taxes')
+      ;['name', 'rate'].forEach((name) => {
+        if (taxes.fields.getByName(name)) taxes.fields.removeByName(name)
+      })
+    } catch (_) {
+      taxes = new Collection({
+        name: 'taxes',
+        type: 'base',
+        fields: [
+          { name: 'created', type: 'autodate', onCreate: true, onUpdate: false },
+          { name: 'updated', type: 'autodate', onCreate: true, onUpdate: true },
+        ],
+      })
+      app.save(taxes)
+    }
+    taxes.listRule = "@request.auth.id != ''"
+    taxes.viewRule = "@request.auth.id != ''"
+    taxes.createRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+    taxes.updateRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+    taxes.deleteRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+
+    const taxesFields = [
+      { name: 'target_margin', type: 'number' },
+      { name: 'das_rate', type: 'number' },
+      { name: 'use_faixa', type: 'bool' },
+      { name: 'faixa', type: 'text' },
+      { name: 'cte_cost', type: 'number' },
+      { name: 'docs_count', type: 'number' },
+      { name: 'taxas_fiscal', type: 'number' },
+      { name: 'dead_km', type: 'number' },
+      { name: 'custom_fields', type: 'json' },
+    ]
+    taxesFields.forEach((f) => {
+      if (!taxes.fields.getByName(f.name)) {
+        if (f.type === 'number') taxes.fields.add(new NumberField({ name: f.name }))
+        if (f.type === 'bool') taxes.fields.add(new BoolField({ name: f.name }))
+        if (f.type === 'text') taxes.fields.add(new TextField({ name: f.name }))
+        if (f.type === 'json') taxes.fields.add(new JSONField({ name: f.name }))
+      }
+    })
+    app.save(taxes)
+
+    // 8. CPK Calculations
+    let cpkCalc
+    try {
+      cpkCalc = app.findCollectionByNameOrId('cpk_calculations')
+      ;['vinculo_id', 'driver_id', 'vehicle_id', 'calculated_cpk', 'status', 'details'].forEach(
+        (name) => {
+          if (cpkCalc.fields.getByName(name)) cpkCalc.fields.removeByName(name)
+        },
+      )
+    } catch (_) {
+      cpkCalc = new Collection({
+        name: 'cpk_calculations',
+        type: 'base',
+        fields: [
+          { name: 'created', type: 'autodate', onCreate: true, onUpdate: false },
+          { name: 'updated', type: 'autodate', onCreate: true, onUpdate: true },
+        ],
+      })
+      app.save(cpkCalc)
+    }
+    cpkCalc.listRule = "@request.auth.id != ''"
+    cpkCalc.viewRule = "@request.auth.id != ''"
+    cpkCalc.createRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Funcionário Financeiro' || @request.auth.role ?= 'Diretor'"
+    cpkCalc.updateRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Funcionário Financeiro' || @request.auth.role ?= 'Diretor'"
+    cpkCalc.deleteRule =
+      "@request.auth.role ?= 'Supervisor Financeiro' || @request.auth.role ?= 'Diretor'"
+
+    const usersCol = app.findCollectionByNameOrId('_pb_users_auth_')
+    const calcFields = [
+      { name: 'user_id', type: 'relation', collectionId: usersCol.id },
+      { name: 'month_year', type: 'text' },
+      { name: 'cpk', type: 'number' },
+      { name: 'margin', type: 'number' },
+      { name: 'faturamento', type: 'number' },
+      { name: 'das_cost', type: 'number' },
+      { name: 'das_percent', type: 'number' },
+      { name: 'total_cost', type: 'number' },
+      { name: 'estimated_km', type: 'number' },
+      { name: 'costs', type: 'json' },
+      { name: 'full_state', type: 'json' },
+      { name: 'document_id', type: 'text' },
+    ]
+    calcFields.forEach((f) => {
+      if (!cpkCalc.fields.getByName(f.name)) {
+        if (f.type === 'number') cpkCalc.fields.add(new NumberField({ name: f.name }))
+        if (f.type === 'text') cpkCalc.fields.add(new TextField({ name: f.name }))
+        if (f.type === 'json') cpkCalc.fields.add(new JSONField({ name: f.name }))
+        if (f.type === 'relation')
+          cpkCalc.fields.add(
+            new RelationField({ name: f.name, collectionId: f.collectionId, maxSelect: 1 }),
+          )
+      }
+    })
+    app.save(cpkCalc)
+
+    // 9. Deduplicate before unique constraints
     try {
       app
         .db()
@@ -46,15 +346,6 @@ migrate(
       app
         .db()
         .newQuery(
-          `DELETE FROM drivers WHERE id NOT IN (SELECT MIN(id) FROM drivers GROUP BY local_id) AND local_id IS NOT NULL AND local_id != ''`,
-        )
-        .execute()
-    } catch (e) {}
-
-    try {
-      app
-        .db()
-        .newQuery(
           `DELETE FROM vehicles WHERE id NOT IN (SELECT MIN(id) FROM vehicles GROUP BY plate) AND plate IS NOT NULL AND plate != ''`,
         )
         .execute()
@@ -63,219 +354,42 @@ migrate(
       app
         .db()
         .newQuery(
-          `DELETE FROM vehicles WHERE id NOT IN (SELECT MIN(id) FROM vehicles GROUP BY local_id) AND local_id IS NOT NULL AND local_id != ''`,
+          `DELETE FROM cpk_calculations WHERE id NOT IN (SELECT MIN(id) FROM cpk_calculations GROUP BY document_id) AND document_id IS NOT NULL AND document_id != ''`,
         )
         .execute()
     } catch (e) {}
 
-    try {
-      app
-        .db()
-        .newQuery(
-          `DELETE FROM vinculos WHERE id NOT IN (SELECT MIN(id) FROM vinculos GROUP BY local_id) AND local_id IS NOT NULL AND local_id != ''`,
-        )
-        .execute()
-    } catch (e) {}
-
-    // 5. Add Indexes
+    // 10. Indexes
     drivers = app.findCollectionByNameOrId('drivers')
     drivers.addIndex('idx_drivers_cpf', true, 'cpf', "cpf != '' AND cpf IS NOT NULL")
-    drivers.addIndex('idx_drivers_local_id', true, 'local_id', "local_id != ''")
-    drivers.addIndex('idx_drivers_deleted_at', false, 'deleted_at', '')
+    drivers.addIndex('idx_drivers_name', false, 'name', '')
     app.save(drivers)
 
     vehicles = app.findCollectionByNameOrId('vehicles')
     vehicles.addIndex('idx_vehicles_plate', true, 'plate', "plate != '' AND plate IS NOT NULL")
-    vehicles.addIndex('idx_vehicles_local_id', true, 'local_id', "local_id != ''")
-    vehicles.addIndex('idx_vehicles_deleted_at', false, 'deleted_at', '')
     app.save(vehicles)
 
     vinculos = app.findCollectionByNameOrId('vinculos')
-    vinculos.addIndex('idx_vinculos_local_id', true, 'local_id', "local_id != ''")
-    vinculos.addIndex('idx_vinculos_deleted_at', false, 'deleted_at', '')
+    vinculos.addIndex('idx_vinculos_driver_id', false, 'driver_id', '')
+    vinculos.addIndex('idx_vinculos_vehicle_id', false, 'vehicle_id', '')
     app.save(vinculos)
 
-    // 5. Update Audit Logs
-    const audit = app.findCollectionByNameOrId('audit_logs')
-    audit.addIndex('idx_audit_logs_action', false, 'action', '')
-    audit.addIndex('idx_audit_logs_user_id', false, 'user_id', '')
-    app.save(audit)
+    auditLogs = app.findCollectionByNameOrId('audit_logs')
+    auditLogs.addIndex('idx_audit_logs_user_id', false, 'user_id', '')
+    auditLogs.addIndex('idx_audit_logs_action', false, 'action', '')
+    auditLogs.addIndex('idx_audit_logs_resource_type', false, 'resource_type', '')
+    app.save(auditLogs)
 
-    // 6. Create HQ Costs
-    const hqCosts = new Collection({
-      name: 'hq_costs',
-      type: 'base',
-      listRule: "@request.auth.id != ''",
-      viewRule: "@request.auth.id != ''",
-      createRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      updateRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      deleteRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      fields: [
-        { name: 'name', type: 'text', required: true },
-        { name: 'value', type: 'number', required: true },
-        {
-          name: 'type',
-          type: 'select',
-          values: ['fixed', 'variable'],
-          maxSelect: 1,
-          required: true,
-        },
-        { name: 'created', type: 'autodate', onCreate: true, onUpdate: false },
-        { name: 'updated', type: 'autodate', onCreate: true, onUpdate: true },
-      ],
-    })
-    app.save(hqCosts)
-
-    // 7. Create Taxes
-    const taxes = new Collection({
-      name: 'taxes',
-      type: 'base',
-      listRule: "@request.auth.id != ''",
-      viewRule: "@request.auth.id != ''",
-      createRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      updateRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      deleteRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      fields: [
-        { name: 'name', type: 'text', required: true },
-        { name: 'rate', type: 'number', required: true, min: 0, max: 100 },
-        { name: 'created', type: 'autodate', onCreate: true, onUpdate: false },
-        { name: 'updated', type: 'autodate', onCreate: true, onUpdate: true },
-      ],
-    })
-    app.save(taxes)
-
-    // 8. Create CPK Settings
-    const cpkSettings = new Collection({
-      name: 'cpk_settings',
-      type: 'base',
-      listRule: "@request.auth.id != ''",
-      viewRule: "@request.auth.id != ''",
-      createRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      updateRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      deleteRule: null,
-      fields: [
-        { name: 'max_cpk', type: 'number', required: true },
-        { name: 'min_margin', type: 'number', required: true, min: 0, max: 100 },
-        { name: 'yellow_margin', type: 'number', required: true, min: 0, max: 100 },
-        { name: 'das_rate', type: 'number', required: true, min: 0, max: 100 },
-        { name: 'fuel_price', type: 'number', required: true },
-        { name: 'target_margin', type: 'number', required: false, min: 0, max: 100 },
-        { name: 'created', type: 'autodate', onCreate: true, onUpdate: false },
-        { name: 'updated', type: 'autodate', onCreate: true, onUpdate: true },
-      ],
-    })
-    app.save(cpkSettings)
-
-    // 9. Create CPK Calculations
-    const cpkCalc = new Collection({
-      name: 'cpk_calculations',
-      type: 'base',
-      listRule: "@request.auth.id != ''",
-      viewRule: "@request.auth.id != ''",
-      createRule: "@request.auth.id != ''",
-      updateRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      deleteRule: "@request.auth.role = 'Supervisor Financeiro' || @request.auth.role = 'Diretor'",
-      fields: [
-        { name: 'vinculo_id', type: 'relation', collectionId: vinculos.id, maxSelect: 1 },
-        { name: 'driver_id', type: 'relation', collectionId: drivers.id, maxSelect: 1 },
-        { name: 'vehicle_id', type: 'relation', collectionId: vehicles.id, maxSelect: 1 },
-        { name: 'calculated_cpk', type: 'number', required: true },
-        { name: 'margin', type: 'number', required: true },
-        {
-          name: 'status',
-          type: 'select',
-          values: ['healthy', 'warning', 'critical'],
-          maxSelect: 1,
-          required: true,
-        },
-        { name: 'details', type: 'json' },
-        { name: 'created', type: 'autodate', onCreate: true, onUpdate: false },
-        { name: 'updated', type: 'autodate', onCreate: true, onUpdate: true },
-      ],
-    })
+    cpkCalc = app.findCollectionByNameOrId('cpk_calculations')
+    cpkCalc.addIndex('idx_cpk_calculations_user_id', false, 'user_id', '')
+    cpkCalc.addIndex('idx_cpk_calculations_month_year', false, 'month_year', '')
     app.save(cpkCalc)
-
-    // 10. Views
-    try {
-      const activeDrivers = new Collection({
-        name: 'active_drivers',
-        type: 'view',
-        listRule: "@request.auth.id != ''",
-        viewRule: "@request.auth.id != ''",
-        viewQuery:
-          "SELECT id, local_id, name, cpf, base_salary, created, updated FROM drivers WHERE deleted_at = '' OR deleted_at IS NULL",
-      })
-      app.save(activeDrivers)
-    } catch (e) {
-      console.log('Skipping active_drivers creation:', e.message)
-    }
-
-    try {
-      const activeVehicles = new Collection({
-        name: 'active_vehicles',
-        type: 'view',
-        listRule: "@request.auth.id != ''",
-        viewRule: "@request.auth.id != ''",
-        viewQuery:
-          "SELECT id, local_id, plate, purchase_value, consumo, created, updated FROM vehicles WHERE deleted_at = '' OR deleted_at IS NULL",
-      })
-      app.save(activeVehicles)
-    } catch (e) {
-      console.log('Skipping active_vehicles creation:', e.message)
-    }
-
-    try {
-      const activeVinculos = new Collection({
-        name: 'active_vinculos',
-        type: 'view',
-        listRule: "@request.auth.id != ''",
-        viewRule: "@request.auth.id != ''",
-        viewQuery:
-          "SELECT id, local_id, driver_id, vehicle_id, km_mensal, created, updated FROM vinculos WHERE deleted_at = '' OR deleted_at IS NULL",
-      })
-      app.save(activeVinculos)
-    } catch (e) {
-      console.log('Skipping active_vinculos creation:', e.message)
-    }
-
-    try {
-      const recentAuditLogs = new Collection({
-        name: 'recent_audit_logs',
-        type: 'view',
-        listRule: "@request.auth.id != ''",
-        viewRule: "@request.auth.id != ''",
-        viewQuery:
-          'SELECT id, user_id, action, resource_type, created, updated FROM audit_logs ORDER BY created DESC LIMIT 1000',
-      })
-      app.save(recentAuditLogs)
-    } catch (e) {
-      console.log('Skipping recent_audit_logs creation:', e.message)
-    }
   },
   (app) => {
     try {
-      app.delete(app.findCollectionByNameOrId('recent_audit_logs'))
-    } catch (_) {}
-    try {
-      app.delete(app.findCollectionByNameOrId('active_vinculos'))
-    } catch (_) {}
-    try {
-      app.delete(app.findCollectionByNameOrId('active_vehicles'))
-    } catch (_) {}
-    try {
-      app.delete(app.findCollectionByNameOrId('active_drivers'))
-    } catch (_) {}
-    try {
-      app.delete(app.findCollectionByNameOrId('cpk_calculations'))
-    } catch (_) {}
-    try {
-      app.delete(app.findCollectionByNameOrId('cpk_settings'))
-    } catch (_) {}
-    try {
-      app.delete(app.findCollectionByNameOrId('taxes'))
-    } catch (_) {}
-    try {
-      app.delete(app.findCollectionByNameOrId('hq_costs'))
+      let cpkSettings = app.findCollectionByNameOrId('cpk_settings')
+      cpkSettings.name = 'fleet_settings'
+      app.save(cpkSettings)
     } catch (_) {}
   },
 )
