@@ -1,6 +1,39 @@
 migrate(
   (app) => {
-    // 1. Deduplicate existing records before adding unique constraints
+    // 1. Update Drivers fields
+    let drivers = app.findCollectionByNameOrId('drivers')
+    if (!drivers.fields.getByName('cpf')) {
+      drivers.fields.add(
+        new TextField({ name: 'cpf', pattern: '^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$' }),
+      )
+    }
+    if (!drivers.fields.getByName('base_salary')) {
+      drivers.fields.add(new NumberField({ name: 'base_salary' }))
+    }
+    if (!drivers.fields.getByName('encargos')) {
+      drivers.fields.add(new JSONField({ name: 'encargos' }))
+    }
+    app.save(drivers)
+
+    // 2. Update Vehicles fields
+    let vehicles = app.findCollectionByNameOrId('vehicles')
+    const plateField = vehicles.fields.getByName('plate')
+    if (plateField) {
+      plateField.pattern = '^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$'
+    }
+    if (!vehicles.fields.getByName('consumo')) {
+      vehicles.fields.add(new NumberField({ name: 'consumo' }))
+    }
+    app.save(vehicles)
+
+    // 3. Update Vinculos fields
+    let vinculos = app.findCollectionByNameOrId('vinculos')
+    if (!vinculos.fields.getByName('km_mensal')) {
+      vinculos.fields.add(new NumberField({ name: 'km_mensal' }))
+    }
+    app.save(vinculos)
+
+    // 4. Deduplicate existing records before adding unique constraints
     try {
       app
         .db()
@@ -44,43 +77,20 @@ migrate(
         .execute()
     } catch (e) {}
 
-    // 2. Update Drivers
-    const drivers = app.findCollectionByNameOrId('drivers')
-    if (!drivers.fields.getByName('cpf')) {
-      drivers.fields.add(
-        new TextField({ name: 'cpf', pattern: '^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$' }),
-      )
-    }
-    if (!drivers.fields.getByName('base_salary')) {
-      drivers.fields.add(new NumberField({ name: 'base_salary' }))
-    }
-    if (!drivers.fields.getByName('encargos')) {
-      drivers.fields.add(new JSONField({ name: 'encargos' }))
-    }
+    // 5. Add Indexes
+    drivers = app.findCollectionByNameOrId('drivers')
     drivers.addIndex('idx_drivers_cpf', true, 'cpf', "cpf != '' AND cpf IS NOT NULL")
     drivers.addIndex('idx_drivers_local_id', true, 'local_id', "local_id != ''")
     drivers.addIndex('idx_drivers_deleted_at', false, 'deleted_at', '')
     app.save(drivers)
 
-    // 3. Update Vehicles
-    const vehicles = app.findCollectionByNameOrId('vehicles')
-    const plateField = vehicles.fields.getByName('plate')
-    if (plateField) {
-      plateField.pattern = '^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$'
-    }
-    if (!vehicles.fields.getByName('consumo')) {
-      vehicles.fields.add(new NumberField({ name: 'consumo' }))
-    }
+    vehicles = app.findCollectionByNameOrId('vehicles')
     vehicles.addIndex('idx_vehicles_plate', true, 'plate', "plate != '' AND plate IS NOT NULL")
     vehicles.addIndex('idx_vehicles_local_id', true, 'local_id', "local_id != ''")
     vehicles.addIndex('idx_vehicles_deleted_at', false, 'deleted_at', '')
     app.save(vehicles)
 
-    // 4. Update Vinculos
-    const vinculos = app.findCollectionByNameOrId('vinculos')
-    if (!vinculos.fields.getByName('km_mensal')) {
-      vinculos.fields.add(new NumberField({ name: 'km_mensal' }))
-    }
+    vinculos = app.findCollectionByNameOrId('vinculos')
     vinculos.addIndex('idx_vinculos_local_id', true, 'local_id', "local_id != ''")
     vinculos.addIndex('idx_vinculos_deleted_at', false, 'deleted_at', '')
     app.save(vinculos)
