@@ -131,11 +131,4 @@ export function SupervisorSettings() {
         </div>
 
         <div className="flex justify-end pt-4 border-t mt-8">
-          <Button onClick={handleSave} className="w-full md:w-auto shadow-sm">
-            Aplicar e Salvar Configurações
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
+          <Button onClic
