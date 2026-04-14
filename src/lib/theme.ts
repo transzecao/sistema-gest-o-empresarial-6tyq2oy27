@@ -1,7 +1,7 @@
 export const THEME = {
   colors: {
     brand: {
-      primary: '#0056b3',
+      primary: '#800020',
       secondary: '#5E5A57',
     },
     status: {

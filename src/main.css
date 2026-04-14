@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 18 67% 2%;
 
-    --primary: 211 100% 35%; /* #0056b3 Transzecão Blue */
+    --primary: 345 100% 25%; /* #800020 Bordeaux */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 24 4% 35%;
@@ -30,17 +30,17 @@
 
     --border: 49 20% 80%;
     --input: 49 20% 80%;
-    --ring: 211 100% 35%;
+    --ring: 345 100% 25%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 211 100% 35%;
+    --sidebar-background: 345 100% 25%;
     --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 49 46% 93%;
-    --sidebar-primary-foreground: 211 100% 35%;
-    --sidebar-accent: 211 80% 25%;
+    --sidebar-primary-foreground: 345 100% 25%;
+    --sidebar-accent: 345 100% 18%;
     --sidebar-accent-foreground: 49 46% 93%;
-    --sidebar-border: 211 80% 25%;
+    --sidebar-border: 345 100% 18%;
     --sidebar-ring: 49 46% 93%;
 
     --status-healthy: 160 84% 39%; /* #10b981 */
@@ -55,7 +55,7 @@
     --card-foreground: 49 46% 93%;
     --popover: 18 67% 2%;
     --popover-foreground: 49 46% 93%;
-    --primary: 211 100% 50%; /* Lighter blue for dark mode */
+    --primary: 345 100% 38%; /* #c00030 Lighter Bordeaux for dark mode */
     --primary-foreground: 0 0% 100%;
     --secondary: 24 4% 35%;
     --secondary-foreground: 49 46% 93%;
@@ -67,7 +67,16 @@
     --destructive-foreground: 0 85.7% 97.3%;
     --border: 24 4% 20%;
     --input: 24 4% 20%;
-    --ring: 211 100% 50%;
+    --ring: 345 100% 38%;
+
+    --sidebar-background: 345 100% 15%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 345 100% 38%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 345 100% 25%;
+    --sidebar-accent-foreground: 49 46% 93%;
+    --sidebar-border: 345 100% 25%;
+
     --status-healthy: 160 84% 45%;
     --status-warning: 38 92% 55%;
     --status-critical: 0 84% 65%;

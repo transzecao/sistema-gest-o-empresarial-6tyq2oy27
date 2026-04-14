@@ -28,6 +28,7 @@ export const updateCluster = (id: string, data: Partial<Cluster>) =>
 
 export const createQuotation = (data: any) => pb.collection('cotacoes').create(data)
 export const updateQuotation = (id: string, data: any) => pb.collection('cotacoes').update(id, data)
+export const deleteQuotation = (id: string) => pb.collection('cotacoes').delete(id)
 export const getQuotations = () => pb.collection('cotacoes').getFullList({ sort: '-created' })
 export const getQuotationAudit = (cotacaoId: string) =>
   pb
