@@ -1,6 +1,7 @@
 import { FleetCostsForm } from '@/components/cpk/FleetCostsForm'
 import { AdminPanelDialog } from '@/components/cpk/admin/AdminPanelDialog'
 import { MonthlySnapshots } from '@/components/cpk/MonthlySnapshots'
+import { SupervisorSettings } from '@/components/scheduling/SupervisorSettings'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
 
@@ -13,8 +14,8 @@ export default function DashboardSupervisor() {
             Portal do Supervisor Financeiro
           </h1>
           <p className="text-muted-foreground mt-2 max-w-2xl">
-            Área de supervisão e auditoria. Verifique os indicadores da equipe e gerencie
-            fechamentos excepcionais de frota.
+            Área de supervisão e auditoria. Verifique os indicadores da equipe, configure as regras
+            de agendamento e gerencie frota.
           </p>
         </div>
         <div className="flex gap-2">
@@ -30,6 +31,7 @@ export default function DashboardSupervisor() {
       </div>
 
       <div className="grid gap-6">
+        <SupervisorSettings />
         <FleetCostsForm />
         <MonthlySnapshots />
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getSchedules } from '@/services/schedules'
+import { getAgendamentos } from '@/services/agendamentos'
 import { useRealtime } from '@/hooks/use-realtime'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -9,14 +9,14 @@ export function SubFunctionSchedules() {
   const [schedules, setSchedules] = useState<any[]>([])
 
   const loadData = async () => {
-    const data = await getSchedules(`status = "Devolvido"`)
+    const data = await getAgendamentos(`status = "Devolvido" || status = "Rejeitado"`)
     setSchedules(data)
   }
 
   useEffect(() => {
     loadData()
   }, [])
-  useRealtime('schedules', loadData)
+  useRealtime('agendamentos', loadData)
 
   const grouped = schedules.reduce(
     (acc, curr) => {
@@ -30,7 +30,7 @@ export function SubFunctionSchedules() {
 
   return (
     <div className="space-y-6 mt-6">
-      <h2 className="text-2xl font-semibold tracking-tight">Coletas Devolvidas</h2>
+      <h2 className="text-2xl font-semibold tracking-tight">Coletas Devolvidas / Rejeitadas</h2>
       {Object.entries(grouped).map(([date, items]) => (
         <Card key={date}>
           <CardHeader className="pb-3 bg-muted/40">
@@ -41,20 +41,28 @@ export function SubFunctionSchedules() {
           <CardContent className="p-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => (
-                <div key={item.id} className="border rounded-lg p-3 shadow-sm bg-card">
+                <div
+                  key={item.id}
+                  className="border rounded-lg p-3 shadow-sm bg-card border-l-4 border-l-destructive"
+                >
                   <div className="flex justify-between items-center mb-2">
-                    <Badge variant="destructive">Devolvido</Badge>
+                    <Badge variant="destructive">{item.status}</Badge>
                     <span className="text-xs text-muted-foreground font-mono">
-                      NF: {item.invoice_nf}
+                      NF: {item.numero_nota_fiscal}
                     </span>
                   </div>
-                  <p className="text-sm font-medium truncate mb-1">{item.dest_address}</p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    Origem: {item.origin_address}
+                  <p className="text-sm font-medium truncate mb-1" title={item.endereco_destino}>
+                    {item.endereco_destino}
+                  </p>
+                  <p
+                    className="text-xs text-muted-foreground truncate"
+                    title={item.endereco_origem}
+                  >
+                    Origem: {item.endereco_origem}
                   </p>
                   <div className="mt-3 text-xs text-muted-foreground border-t pt-2 flex justify-between">
-                    <span>{item.weight}kg</span>
-                    <span>Pri: {item.priority}</span>
+                    <span>{item.peso}kg</span>
+                    <span>Pri: {item.prioridade}</span>
                   </div>
                 </div>
               ))}
@@ -64,7 +72,7 @@ export function SubFunctionSchedules() {
       ))}
       {Object.keys(grouped).length === 0 && (
         <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
-          Nenhuma coleta devolvida no momento.
+          Nenhuma coleta devolvida ou rejeitada no momento.
         </div>
       )}
     </div>

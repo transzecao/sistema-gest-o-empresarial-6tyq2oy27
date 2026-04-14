@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { createSchedule, getScheduleByNF } from '@/services/schedules'
+import { createAgendamento } from '@/services/agendamentos'
 import { useAuth } from '@/hooks/use-auth'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
@@ -22,54 +22,80 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { MapPin } from 'lucide-react'
+import pb from '@/lib/pocketbase/client'
 
 const schema = z.object({
-  origin_cnpj: z.string().min(1, 'Obrigatório'),
-  origin_address: z.string().min(1, 'Obrigatório'),
-  dest_cnpj: z.string().min(1, 'Obrigatório'),
-  dest_address: z.string().min(1, 'Obrigatório'),
-  weight: z.coerce.number().min(0.1, 'Peso inválido'),
-  dimensions: z.string().min(1, 'Ex: 10x10x10'),
-  package_qty: z.coerce.number().min(1).max(3),
-  cargo_type: z.string(),
-  invoice_nf: z.string().min(1, 'Obrigatório'),
-  preferred_time: z.string().optional(),
-  priority: z.enum(['Urgente', 'Manhã', 'Tarde', 'Comercial']),
+  cnpj_origem: z.string().min(1, 'Obrigatório'),
+  endereco_origem: z.string().min(1, 'Obrigatório'),
+  cnpj_destino: z.string().min(1, 'Obrigatório'),
+  endereco_destino: z.string().min(1, 'Obrigatório'),
+  peso: z.coerce.number().min(0.1, 'Peso inválido'),
+  largura: z.coerce.number().min(1, 'Largura mín 1'),
+  altura: z.coerce.number().min(1, 'Altura mín 1'),
+  profundidade: z.coerce.number().min(1, 'Prof mín 1'),
+  quantidade_pacotes: z.coerce.number().min(1).max(3),
+  tipo_carga: z.string(),
+  numero_nota_fiscal: z.string().min(1, 'Obrigatório'),
+  hora_desejada: z.string().optional(),
+  prioridade: z.enum(['Urgente', 'Manhã', 'Tarde', 'Comercial']),
 })
 
 export function ScheduleForm() {
   const { user } = useAuth()
   const { toast } = useToast()
+
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
-      origin_cnpj: '',
-      origin_address: '',
-      dest_cnpj: '',
-      dest_address: '',
-      weight: 0,
-      dimensions: '',
-      package_qty: 1,
-      cargo_type: 'aberto',
-      invoice_nf: '',
-      preferred_time: '',
-      priority: 'Comercial',
+      cnpj_origem: '',
+      endereco_origem: '',
+      cnpj_destino: '',
+      endereco_destino: '',
+      peso: 0,
+      largura: 10,
+      altura: 10,
+      profundidade: 10,
+      quantidade_pacotes: 1,
+      tipo_carga: 'Geral',
+      numero_nota_fiscal: '',
+      hora_desejada: '',
+      prioridade: 'Comercial',
     },
   })
 
   const onSubmit = async (data: z.infer<typeof schema>) => {
     if (!user) return
-    const existing = await getScheduleByNF(data.invoice_nf)
-    if (existing) {
-      toast({ variant: 'destructive', title: 'Erro', description: 'NF já cadastrada no sistema.' })
-      return
-    }
     try {
-      await createSchedule({ ...data, client_id: user.id, status: 'Fila' })
+      const existing = await pb
+        .collection('agendamentos')
+        .getFirstListItem(`numero_nota_fiscal="${data.numero_nota_fiscal}"`)
+      if (existing) {
+        toast({
+          variant: 'destructive',
+          title: 'Erro',
+          description: 'NF já cadastrada no sistema.',
+        })
+        return
+      }
+    } catch {
+      // Not found, proceed
+    }
+
+    try {
+      await createAgendamento({
+        ...data,
+        cliente_id: user.id,
+        status: 'Aguardando Coleta',
+        fase_atual: 'Coleta',
+      })
       toast({ title: 'Sucesso', description: 'Agendamento criado com sucesso!' })
       form.reset()
-    } catch (err) {
-      toast({ variant: 'destructive', title: 'Erro', description: 'Falha ao salvar agendamento.' })
+    } catch (err: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: err.message || 'Falha ao salvar agendamento.',
+      })
     }
   }
 
@@ -79,7 +105,7 @@ export function ScheduleForm() {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="origin_cnpj"
+            name="cnpj_origem"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>CNPJ Origem</FormLabel>
@@ -92,7 +118,7 @@ export function ScheduleForm() {
           />
           <FormField
             control={form.control}
-            name="dest_cnpj"
+            name="cnpj_destino"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>CNPJ Destino</FormLabel>
@@ -107,7 +133,7 @@ export function ScheduleForm() {
 
         <FormField
           control={form.control}
-          name="origin_address"
+          name="endereco_origem"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Endereço de Origem</FormLabel>
@@ -128,7 +154,7 @@ export function ScheduleForm() {
 
         <FormField
           control={form.control}
-          name="dest_address"
+          name="endereco_destino"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Endereço de Destino</FormLabel>
@@ -147,10 +173,10 @@ export function ScheduleForm() {
           )}
         />
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <FormField
             control={form.control}
-            name="weight"
+            name="peso"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Peso (kg)</FormLabel>
@@ -163,12 +189,12 @@ export function ScheduleForm() {
           />
           <FormField
             control={form.control}
-            name="dimensions"
+            name="largura"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Dimens (LxAxP)</FormLabel>
+                <FormLabel>Larg (cm)</FormLabel>
                 <FormControl>
-                  <Input placeholder="10x10x10" {...field} />
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -176,7 +202,36 @@ export function ScheduleForm() {
           />
           <FormField
             control={form.control}
-            name="package_qty"
+            name="altura"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Alt (cm)</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="profundidade"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Prof (cm)</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="quantidade_pacotes"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Vols (1-3)</FormLabel>
@@ -187,14 +242,11 @@ export function ScheduleForm() {
               </FormItem>
             )}
           />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="invoice_nf"
+            name="numero_nota_fiscal"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-2">
                 <FormLabel>Nota Fiscal</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -203,33 +255,34 @@ export function ScheduleForm() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="priority"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Prioridade</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione..." />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Urgente">Urgente</SelectItem>
-                    <SelectItem value="Manhã">Manhã</SelectItem>
-                    <SelectItem value="Tarde">Tarde</SelectItem>
-                    <SelectItem value="Comercial">Comercial</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
-        <Button type="submit" className="w-full">
-          Agendar Coleta
+        <FormField
+          control={form.control}
+          name="prioridade"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prioridade</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="Urgente">Urgente</SelectItem>
+                  <SelectItem value="Manhã">Manhã</SelectItem>
+                  <SelectItem value="Tarde">Tarde</SelectItem>
+                  <SelectItem value="Comercial">Comercial</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full mt-6">
+          Agendar Solicitação
         </Button>
       </form>
     </Form>

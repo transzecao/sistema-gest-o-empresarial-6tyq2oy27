@@ -8,7 +8,9 @@ export default function DashboardCliente() {
     <div className="space-y-6 animate-fade-in-up">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Portal do Cliente</h1>
-        <p className="text-muted-foreground">Acompanhamento e rastreio de pedidos e entregas.</p>
+        <p className="text-muted-foreground">
+          Acompanhamento e rastreio de pedidos e entregas com timeline em tempo real.
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -44,7 +46,7 @@ export default function DashboardCliente() {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-[400px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[400px_1fr] items-start">
         <Card className="shadow-md h-fit">
           <CardHeader className="border-b bg-muted/30">
             <CardTitle className="text-lg">Novo Agendamento</CardTitle>
@@ -58,7 +60,7 @@ export default function DashboardCliente() {
           <CardHeader className="border-b bg-muted/30">
             <CardTitle className="text-lg">Meus Agendamentos</CardTitle>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 bg-muted/5">
             <CustomerSchedules />
           </CardContent>
         </Card>
