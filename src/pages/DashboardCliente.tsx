@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Package, Truck, CheckCircle } from 'lucide-react'
+import { ScheduleForm } from '@/components/scheduling/ScheduleForm'
+import { CustomerSchedules } from '@/components/scheduling/CustomerSchedules'
 
 export default function DashboardCliente() {
   return (
@@ -38,6 +40,26 @@ export default function DashboardCliente() {
           <CardContent>
             <div className="text-2xl font-bold">42</div>
             <p className="text-xs text-muted-foreground">Histórico total no sistema</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-[400px_1fr]">
+        <Card className="shadow-md h-fit">
+          <CardHeader className="border-b bg-muted/30">
+            <CardTitle className="text-lg">Novo Agendamento</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <ScheduleForm />
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md h-fit">
+          <CardHeader className="border-b bg-muted/30">
+            <CardTitle className="text-lg">Meus Agendamentos</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <CustomerSchedules />
           </CardContent>
         </Card>
       </div>

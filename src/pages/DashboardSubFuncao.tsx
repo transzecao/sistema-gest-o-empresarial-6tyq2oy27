@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ClipboardList, Target } from 'lucide-react'
+import { SubFunctionSchedules } from '@/components/scheduling/SubFunctionSchedules'
 
 export default function DashboardSubFuncao() {
   return (
@@ -31,6 +32,8 @@ export default function DashboardSubFuncao() {
           </CardContent>
         </Card>
       </div>
+
+      <SubFunctionSchedules />
     </div>
   )
 }

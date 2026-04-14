@@ -11,6 +11,7 @@ import DashboardFuncionario from './pages/DashboardFuncionario'
 import DashboardSubFuncao from './pages/DashboardSubFuncao'
 import DashboardCliente from './pages/DashboardCliente'
 import FleetConfigPage from './pages/FleetConfigPage'
+import RoutingPage from './pages/RoutingPage'
 import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
 import { AuthProvider, useAuth } from './hooks/use-auth'
@@ -41,6 +42,7 @@ const AppRoutes = () => {
         <Route path="/dashboard/sub-funcao" element={<DashboardSubFuncao />} />
         <Route path="/dashboard/cliente" element={<DashboardCliente />} />
         <Route path="/dashboard/fleet" element={<FleetConfigPage />} />
+        <Route path="/dashboard/routing" element={<RoutingPage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

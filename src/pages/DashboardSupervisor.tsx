@@ -1,6 +1,8 @@
 import { FleetCostsForm } from '@/components/cpk/FleetCostsForm'
 import { AdminPanelDialog } from '@/components/cpk/admin/AdminPanelDialog'
 import { MonthlySnapshots } from '@/components/cpk/MonthlySnapshots'
+import { Button } from '@/components/ui/button'
+import { Link } from 'react-router-dom'
 
 export default function DashboardSupervisor() {
   return (
@@ -15,7 +17,16 @@ export default function DashboardSupervisor() {
             fechamentos excepcionais de frota.
           </p>
         </div>
-        <AdminPanelDialog />
+        <div className="flex gap-2">
+          <Button
+            asChild
+            variant="outline"
+            className="shadow-sm border-primary/20 hover:border-primary/50 text-primary"
+          >
+            <Link to="/dashboard/routing">Mesa de Roteirização</Link>
+          </Button>
+          <AdminPanelDialog />
+        </div>
       </div>
 
       <div className="grid gap-6">
