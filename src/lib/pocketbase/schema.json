@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-14T16:52:18.593Z",
+  "generatedAt": "2026-04-14T17:02:22.753Z",
   "collections": [
     {
       "name": "users",
@@ -715,6 +715,400 @@
         },
         {
           "name": "stop_sequence",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "motorista_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "drivers"
+        },
+        {
+          "name": "horario_estimado",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Pendente", "Em Andamento", "Concluída"]
+        },
+        {
+          "name": "tipo_rota",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Coleta", "Entrega"]
+        },
+        {
+          "name": "data",
+          "type": "date",
+          "required": false,
+          "system": false
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX `idx_rotas_motorista` ON `routes` (motorista_id)",
+        "CREATE INDEX `idx_rotas_data` ON `routes` (data)"
+      ]
+    },
+    {
+      "name": "agendamentos",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "cliente_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "funcionario_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "cnpj_origem",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "endereco_origem",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "lat_origem",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "lng_origem",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cnpj_destino",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "endereco_destino",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "lat_destino",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "lng_destino",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "peso",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "largura",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "altura",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "profundidade",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "quantidade_pacotes",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "tipo_carga",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "numero_nota_fiscal",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "hora_desejada",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "prioridade",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["Urgente", "Manhã", "Tarde", "Comercial"]
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "Aguardando Coleta",
+            "Em Coleta",
+            "Aguardando Entrega",
+            "Saiu para Entrega",
+            "Concluído",
+            "Cancelado",
+            "Rejeitado",
+            "Devolvido"
+          ]
+        },
+        {
+          "name": "fase_atual",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Coleta", "Entrega"]
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "veiculo_coleta_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vehicles"
+        },
+        {
+          "name": "veiculo_entrega_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vehicles"
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_agendamentos_nf ON agendamentos (numero_nota_fiscal) WHERE numero_nota_fiscal != '' AND numero_nota_fiscal IS NOT NULL",
+        "CREATE INDEX idx_agendamentos_cliente ON agendamentos (cliente_id)"
+      ]
+    },
+    {
+      "name": "paradas_rota",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "rota_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "routes"
+        },
+        {
+          "name": "agendamento_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "agendamentos"
+        },
+        {
+          "name": "ordem",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "horario_estimado",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "horario_real",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Pendente", "Concluída", "Insucesso"]
+        },
+        {
+          "name": "motivo_insucesso",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "configuracoes_agendamento",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "campos_obrigatorios",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "campos_customizados",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "regras_negocio",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "audit_agendamentos",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": null,
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "agendamento_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "agendamentos"
+        },
+        {
+          "name": "user_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "acao",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "detalhes",
           "type": "json",
           "required": false,
           "system": false
