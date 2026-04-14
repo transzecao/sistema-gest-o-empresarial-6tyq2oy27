@@ -24,8 +24,14 @@ export function SupervisorSettings() {
 
   if (!config) return null
 
-  const obrigatorios = JSON.parse(config.campos_obrigatorios || '{}')
-  const regras = JSON.parse(config.regras_negocio || '{}')
+  const obrigatorios =
+    typeof config.campos_obrigatorios === 'string'
+      ? JSON.parse(config.campos_obrigatorios)
+      : config.campos_obrigatorios || {}
+  const regras =
+    typeof config.regras_negocio === 'string'
+      ? JSON.parse(config.regras_negocio)
+      : config.regras_negocio || {}
 
   return (
     <Card className="shadow-sm border-t-4 border-t-primary">
