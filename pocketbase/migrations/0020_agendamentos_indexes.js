@@ -15,6 +15,9 @@ migrate(
     app.save(col)
 
     const rotas = app.findCollectionByNameOrId('routes')
+    if (!rotas.fields.getByName('data')) {
+      rotas.fields.add(new DateField({ name: 'data' }))
+    }
     rotas.addIndex('idx_rotas_motorista', false, 'motorista_id', '')
     rotas.addIndex('idx_rotas_data', false, 'data', '')
     app.save(rotas)
@@ -24,5 +27,12 @@ migrate(
     col.removeIndex('idx_agendamentos_nf')
     col.removeIndex('idx_agendamentos_cliente')
     app.save(col)
+
+    try {
+      const rotas = app.findCollectionByNameOrId('routes')
+      rotas.removeIndex('idx_rotas_motorista')
+      rotas.removeIndex('idx_rotas_data')
+      app.save(rotas)
+    } catch (_) {}
   },
 )
