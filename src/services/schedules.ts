@@ -22,7 +22,9 @@ export const createSchedule = async (data: any) => {
       resource_id: record.id,
       details: { status: data.status, invoice_nf: data.invoice_nf },
     })
-  } catch (e) {}
+  } catch (e) {
+    // ignore audit log failure
+  }
   return record
 }
 
@@ -38,6 +40,8 @@ export const updateScheduleStatus = async (id: string, status: string, time_slot
       resource_id: record.id,
       details: { status, time_slot },
     })
-  } catch (e) {}
+  } catch (e) {
+    // ignore audit log failure
+  }
   return record
 }

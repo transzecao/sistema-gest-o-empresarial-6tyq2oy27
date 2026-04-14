@@ -10,6 +10,8 @@ export const createRoute = async (data: any) => {
       resource_id: record.id,
       details: { stop_sequence: data.stop_sequence },
     })
-  } catch (e) {}
+  } catch (e) {
+    // ignore audit log failure
+  }
   return record
 }
