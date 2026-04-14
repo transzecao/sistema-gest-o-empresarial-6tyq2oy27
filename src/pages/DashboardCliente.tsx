@@ -2,6 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Package, Truck, CheckCircle } from 'lucide-react'
 import { ScheduleForm } from '@/components/scheduling/ScheduleForm'
 import { CustomerSchedules } from '@/components/scheduling/CustomerSchedules'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { QuotationForm } from '@/components/quotations/QuotationForm'
+import { QuotationHistory } from '@/components/quotations/QuotationHistory'
 
 export default function DashboardCliente() {
   return (
@@ -9,7 +12,7 @@ export default function DashboardCliente() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Portal do Cliente</h1>
         <p className="text-muted-foreground">
-          Acompanhamento e rastreio de pedidos e entregas com timeline em tempo real.
+          Cotação instantânea, agendamentos e rastreio de pedidos.
         </p>
       </div>
 
@@ -46,25 +49,37 @@ export default function DashboardCliente() {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[400px_1fr] items-start">
-        <Card className="shadow-md h-fit">
-          <CardHeader className="border-b bg-muted/30">
-            <CardTitle className="text-lg">Novo Agendamento</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ScheduleForm />
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="quotes" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="quotes">Nova Cotação</TabsTrigger>
+          <TabsTrigger value="schedules">Meus Agendamentos</TabsTrigger>
+        </TabsList>
 
-        <Card className="shadow-md h-fit">
-          <CardHeader className="border-b bg-muted/30">
-            <CardTitle className="text-lg">Meus Agendamentos</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6 bg-muted/5">
-            <CustomerSchedules />
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="quotes" className="grid gap-6 lg:grid-cols-2 items-start">
+          <QuotationForm />
+          <QuotationHistory />
+        </TabsContent>
+
+        <TabsContent value="schedules" className="grid gap-6 lg:grid-cols-[400px_1fr] items-start">
+          <Card className="shadow-md h-fit">
+            <CardHeader className="border-b bg-muted/30">
+              <CardTitle className="text-lg">Novo Agendamento Rápido</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <ScheduleForm />
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-md h-fit">
+            <CardHeader className="border-b bg-muted/30">
+              <CardTitle className="text-lg">Meus Agendamentos</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 bg-muted/5">
+              <CustomerSchedules />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
