@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-14T22:22:03.360Z",
+  "generatedAt": "2026-04-15T14:59:15.476Z",
   "collections": [
     {
       "name": "users",
@@ -950,6 +950,12 @@
           "required": false,
           "system": false,
           "collectionRef": "vehicles"
+        },
+        {
+          "name": "valor_nf",
+          "type": "number",
+          "required": true,
+          "system": false
         }
       ],
       "indexes": [
@@ -1448,12 +1454,19 @@
           "type": "text",
           "required": false,
           "system": false
+        },
+        {
+          "name": "numero_nota_fiscal",
+          "type": "text",
+          "required": true,
+          "system": false
         }
       ],
       "indexes": [
         "CREATE INDEX idx_cotacoes_usuario ON cotacoes (usuario_id)",
         "CREATE INDEX idx_cotacoes_cluster ON cotacoes (cluster)",
-        "CREATE INDEX idx_cotacoes_created ON cotacoes (created DESC)"
+        "CREATE INDEX idx_cotacoes_created ON cotacoes (created DESC)",
+        "CREATE INDEX `idx_cotacoes_nf` ON `cotacoes` (numero_nota_fiscal)"
       ]
     },
     {
