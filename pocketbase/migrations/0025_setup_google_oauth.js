@@ -15,8 +15,8 @@ migrate(
       if (!hasGoogle) {
         providers.push({
           name: 'google',
-          clientId: $secrets.get('GOOGLE_CLIENT_ID') || '',
-          clientSecret: $secrets.get('GOOGLE_CLIENT_SECRET') || '',
+          clientId: $secrets.get('GOOGLE_CLIENT_ID') || 'setup_required',
+          clientSecret: $secrets.get('GOOGLE_CLIENT_SECRET') || 'setup_required',
           authUrl: 'https://accounts.google.com/o/oauth2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
           userApiUrl: 'https://www.googleapis.com/oauth2/v1/userinfo',
