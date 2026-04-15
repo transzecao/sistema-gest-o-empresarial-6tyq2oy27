@@ -5,6 +5,7 @@ export interface AuthContextType {
   user: any
   profile: any
   signIn: (email: string, password: string) => Promise<{ error: any; record?: any }>
+  signInWithGoogle: () => Promise<{ error: any; record?: any }>
   signOut: () => void
   loading: boolean
 }
@@ -51,27 +52,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [])
 
+  const logLogin = async (record: any, email: string) => {
+    try {
+      await pb.collection('audit_logs').create({
+        user_id: record.id,
+        action: 'LOGIN',
+        resource_type: 'AUTH',
+        details: { email },
+      })
+    } catch (e) {
+      console.error('Failed to create audit log', e)
+    }
+  }
+
   const signIn = async (email: string, password: string) => {
     try {
       const authData = await pb
         .collection('users')
         .authWithPassword(email, password, { expand: 'profile_id' })
-      try {
-        const currentUser = pb.authStore.record
-        if (currentUser) {
-          await pb.collection('audit_logs').create({
-            user_id: currentUser.id,
-            action: 'LOGIN',
-            resource_type: 'AUTH',
-            details: { email },
-          })
-        }
-      } catch (e) {
-        console.error('Failed to create audit log', e)
+
+      if (authData.record.active === false) {
+        pb.authStore.clear()
+        return { error: new Error('Usuário inativo. Acesso bloqueado.') }
       }
+
+      await logLogin(authData.record, email)
       return { error: null, record: authData.record }
     } catch (error) {
       console.error('Authentication failed:', error)
+      return { error }
+    }
+  }
+
+  const signInWithGoogle = async () => {
+    try {
+      const authData = await pb
+        .collection('users')
+        .authWithOAuth2({ provider: 'google', expand: 'profile_id' })
+
+      if (authData.record.active === false) {
+        pb.authStore.clear()
+        return { error: new Error('Usuário inativo. Acesso bloqueado.') }
+      }
+
+      await logLogin(authData.record, authData.record.email)
+      return { error: null, record: authData.record }
+    } catch (error) {
+      console.error('Google authentication failed:', error)
       return { error }
     }
   }
@@ -81,7 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, signIn, signOut, loading }}>
+    <AuthContext.Provider value={{ user, profile, signIn, signInWithGoogle, signOut, loading }}>
       {children}
     </AuthContext.Provider>
   )

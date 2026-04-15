@@ -38,10 +38,10 @@ const AppRoutes = () => {
       >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/diretor" element={<DashboardDiretor />} />
-        <Route path="/dashboard/supervisor" element={<DashboardSupervisor />} />
+        <Route path="/portal-supervisor" element={<DashboardSupervisor />} />
         <Route path="/dashboard/funcionario" element={<DashboardFuncionario />} />
         <Route path="/dashboard/sub-funcao" element={<DashboardSubFuncao />} />
-        <Route path="/dashboard/cliente" element={<DashboardCliente />} />
+        <Route path="/portal-cliente" element={<DashboardCliente />} />
         <Route path="/dashboard/fleet" element={<FleetConfigPage />} />
         <Route path="/dashboard/routing" element={<RoutingPage />} />
         <Route path="/dashboard/agendar" element={<AgendarPage />} />
